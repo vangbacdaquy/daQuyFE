@@ -2,21 +2,19 @@ rules_version = '2';
  
 service firebase.storage {
   match /b/{bucket}/o {
-    // The path where images will be stored: {date}/{userId}/{fileId}
+    // The path where images will be stored: {date}/{fileId}
     match /{date}/{fileId} {
  
       // READ access is allowed by the user who owns the images.
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
  
       // WRITE (upload) access is allowed only if all conditions are met:
       allow write: if
         // 1. User is authenticated
         request.auth != null &&
-        // 2. User is uploading to their own folder
-        request.auth.uid == userId &&
-        // 3. File size is less than 5MB
+        // 2. File size is less than 5MB
         request.resource.size < 5 * 1024 * 1024 &&
-        // 4. File is an image
+        // 3. File is an image
         request.resource.contentType.matches('image/.*');
     }
   }

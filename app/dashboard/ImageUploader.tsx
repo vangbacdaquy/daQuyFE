@@ -110,7 +110,7 @@ export function ImageUploader() {
       const storageRef = ref(storage, storagePath);
       const uploadTask = uploadBytesResumable(storageRef, file, { contentType: file.type });
  
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<{ gsUri: string; downloadUrl: string }>((resolve, reject) => {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
@@ -124,12 +124,15 @@ export function ImageUploader() {
           },
           async () => {
             try {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve(downloadURL);
-            } catch (downloadError) {
-                console.error(downloadError);
-                setError(`Failed to get download URL for ${file.name}.`);
-                reject(downloadError);
+                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                const bucket = uploadTask.snapshot.ref.bucket;
+                const path = uploadTask.snapshot.ref.fullPath;
+                const gsUri = `gs://${bucket}/${path}`;
+                resolve({ gsUri, downloadUrl });
+            } catch (error) {
+                console.error(error);
+                setError(`Failed to get URL for ${file.name}.`);
+                reject(error);
             }
           }
         );
@@ -137,7 +140,9 @@ export function ImageUploader() {
     });
  
     try {
-        const downloadURLs = await Promise.all(uploadPromises);
+        const uploadResults = await Promise.all(uploadPromises);
+        const gsUris = uploadResults.map(result => result.gsUri);
+        const downloadUrls = uploadResults.map(result => result.downloadUrl);
        
         const token = await getJwt();
         const response = await fetch("/api/process-ai", {
@@ -146,7 +151,7 @@ export function ImageUploader() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ file_uris: downloadURLs, prompt:"đếm và giải thích cho tôi có bao nhiêu món trang sức trong khay này" }),
+            body: JSON.stringify({ file_uris: gsUris, prompt:"đếm và giải thích cho tôi có bao nhiêu món trang sức trong khay này" }),
         });
  
         if (!response.ok) {
@@ -160,7 +165,7 @@ export function ImageUploader() {
         // Assuming the order of items in response matches the order of downloadURLs
         const newProcessedItems: ProcessedItem[] = result.data.items.map((item: any, index: number) => ({
             ...item,
-            imageURL: downloadURLs[index]
+            imageURL: downloadUrls[index]
         }));
  
         setProcessedItems(prev => [...prev, ...newProcessedItems]);
