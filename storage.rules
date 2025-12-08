@@ -3,7 +3,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     // The path where images will be stored: {date}/{userId}/{fileId}
-    match /{date}/{userId}/{fileId} {
+    match /{date}/{fileId} {
  
       // READ access is allowed by the user who owns the images.
       allow read: if request.auth != null && request.auth.uid == userId;
