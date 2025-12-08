@@ -1,12 +1,32 @@
 "use client";
 
-import { FormState, login } from "@/app/login/actions";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const initialState: FormState = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(login, initialState);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
@@ -19,7 +39,7 @@ export default function LoginPage() {
             Sign in to your account
           </p>
 
-          <form action={dispatch} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -30,14 +50,12 @@ export default function LoginPage() {
               <input
                 id="email"
                 type="email"
-                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 placeholder="you@example.com"
               />
-              {state?.errors?.email && (
-                <p className="text-sm text-red-500 mt-1">{state.errors.email[0]}</p>
-              )}
             </div>
 
             <div>
@@ -50,17 +68,15 @@ export default function LoginPage() {
               <input
                 id="password"
                 type="password"
-                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 placeholder="••••••••"
               />
-              {state?.errors?.password && (
-                <p className="text-sm text-red-500 mt-1">{state.errors.password[0]}</p>
-              )}
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -76,42 +92,22 @@ export default function LoginPage() {
               >
                 Forgot password?
               </Link>
-            </div>
+            </div> */}
 
-            <LoginButton />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
 
-            {state?.message && (
-              <p className="text-sm text-red-500 text-center">{state.message}</p>
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
             )}
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Don't have an account?{" "}
-              <Link
-                href="/signup"
-                className="text-blue-600 hover:text-blue-500 dark:text-blue-400 font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function LoginButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800"
-    >
-      {pending ? "Signing in..." : "Sign In"}
-    </button>
   );
 }
