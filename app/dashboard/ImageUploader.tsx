@@ -24,15 +24,14 @@ export function ImageUploader() {
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
   const [error, setError] = useState<string>("");
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
  
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
  
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const processFiles = (files: File[]) => {
     setError("");
- 
     const validFiles: File[] = [];
     const newPreviews: string[] = [];
  
@@ -51,6 +50,31 @@ export function ImageUploader() {
  
     setSelectedImages((prev) => [...prev, ...validFiles]);
     setPreviews((prev) => [...prev, ...newPreviews]);
+  };
+ 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    processFiles(files);
+  };
+ 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+ 
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+ 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
   };
  
   const removeImage = (index: number) => {
@@ -166,7 +190,14 @@ export function ImageUploader() {
  
       <div
         onClick={() => fileInputRef.current?.click()}
-        className="border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`border-2 border-dashed  rounded-lg p-8 sm:p-12 text-center cursor-pointer transition-colors ${
+          isDragging
+            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+            : "border-zinc-300 dark:border-zinc-600 hover:border-blue-500 dark:hover:border-blue-400"
+        }`}
       >
         <svg
           className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-zinc-400"
