@@ -18,6 +18,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+        <link rel="icon" type="image/png" href="//vietjewelers.com/cdn/shop/files/nh_ch_p_man_hinh_2024-06-27_145846-removebg-preview.png?crop=center&amp;height=32&amp;v=1719475248&amp;width=32"/>
       </head>
       <body
         className={`antialiased`}

@@ -29,38 +29,17 @@ export default function DashboardHeader() {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/dashboard" className="text-sea-gold text-xl font-bold tracking-wider">
-                Jewelry AI
+                Viet Jewelers AI
               </Link>
             </div>
             
             {/* Desktop Menu */}
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
-              {/* Dropdown for Jewelry AI */}
-              <div className="relative group">
-                <button 
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out ${
-                    isActive('/dashboard/upload') || isActive('/dashboard/camera') 
-                      ? 'border-sea-gold text-sea-gold' 
-                      : 'border-transparent text-sea-light-gray hover:text-white hover:border-sea-sub-blue'
-                  }`}
-                >
-                  Jewelry AI
-                  <svg className="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <div className="absolute left-0 mt-0 w-48 rounded-md shadow-lg bg-sea-sub-blue ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
-                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    <Link href="/dashboard/camera" className="block px-4 py-2 text-sm text-sea-light-gray hover:bg-sea-blue hover:text-sea-gold" role="menuitem">
-                      Take Photo
-                    </Link>
-                    <Link href="/dashboard/upload" className="block px-4 py-2 text-sm text-sea-light-gray hover:bg-sea-blue hover:text-sea-gold" role="menuitem">
-                      Upload Photo
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
+            <div className="hidden md:ml-10 md:flex md:space-x-8">            
+              <Link 
+                href="/dashboard/upload" 
+                className="block px-4 py-2 text-sm text-sea-light-gray hover:bg-sea-blue hover:text-sea-gold" role="menuitem">
+                Upload Photo
+              </Link>    
               <Link
                 href="/dashboard/report"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out ${
@@ -112,22 +91,12 @@ export default function DashboardHeader() {
       >
         <div className="pt-2 pb-3 space-y-1">
           <Link
-            href="/dashboard"
-            className="block px-3 py-2 text-base font-medium text-sea-gold hover:bg-sea-blue"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Jewelry AI
-          </Link>
-          <Link
-            href="/dashboard/camera"
-            className="block pl-6 pr-4 py-2 text-base font-medium text-sea-light-gray hover:text-white hover:bg-sea-blue"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Take Photo
-          </Link>
-          <Link
             href="/dashboard/upload"
-            className="block pl-6 pr-4 py-2 text-base font-medium text-sea-light-gray hover:text-white hover:bg-sea-blue"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              isActive('/dashboard/upload')
+                ? 'text-sea-gold bg-sea-blue'
+                : 'text-sea-light-gray hover:text-white hover:bg-sea-blue'
+            }`}
             onClick={() => setIsMenuOpen(false)}
           >
             Upload Photo
