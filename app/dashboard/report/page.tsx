@@ -33,13 +33,13 @@ export default function ReportPage() {
         
         {/* Header Section */}
         <div className="p-6 border-b border-sea-blue flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-sea-gold">
+          <h2 className="text-xl font-semibold text-sea-gold">
             {selectedReport ? `Report: ${selectedReport}` : "Daily Reports"}
           </h2>
           {selectedReport && (
             <button 
               onClick={handleBack}
-              className="px-4 py-2 bg-sea-blue text-sea-light-gray rounded hover:bg-sea-blue/80 transition-colors border border-sea-gray/30"
+              className="px-3 py-1.5 text-sm bg-sea-blue text-sea-light-gray rounded hover:bg-sea-blue/80 transition-colors border border-sea-gray/30"
             >
               ← Back to List
             </button>
@@ -49,7 +49,7 @@ export default function ReportPage() {
         <div className="p-6">
           {!selectedReport ? (
             /* List View */
-            <div className="overflow-hidden rounded-lg border border-sea-blue">
+            <div className="overflow-x-auto rounded-lg border border-sea-blue">
               <table className="min-w-full divide-y divide-sea-blue">
                 <thead className="bg-sea-blue">
                   <tr>

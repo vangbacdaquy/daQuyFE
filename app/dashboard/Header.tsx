@@ -1,15 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function DashboardHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -28,7 +51,7 @@ export default function DashboardHeader() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/dashboard" className="text-sea-gold text-xl font-bold tracking-wider">
+              <Link href="/dashboard" className="text-sea-gold text-xl font-medium tracking-wider">
                 Viet Jewelers AI
               </Link>
             </div>
@@ -54,6 +77,14 @@ export default function DashboardHeader() {
           </div>
 
           <div className="flex items-center">
+            {user && user.email && (
+              <div className="hidden md:flex flex-col items-end mr-4">
+                <span className="text-sm text-sea-light-gray">
+                  User: <span className="text-white">{user.email.split('@')[0]}</span>
+                </span>
+                <span className="text-xs text-sea-gray">Role: Nhân viên</span>
+              </div>
+            )}
             <button
               onClick={handleLogout}
               className="hidden md:block ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-sea-blue bg-sea-gold hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sea-gold transition-colors"
@@ -64,6 +95,7 @@ export default function DashboardHeader() {
             {/* Mobile menu button */}
             <div className="-mr-2 flex items-center md:hidden">
               <button
+                ref={buttonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-sea-light-gray hover:text-white hover:bg-sea-sub-blue focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               >
@@ -85,6 +117,7 @@ export default function DashboardHeader() {
 
       {/* Mobile Menu */}
       <div 
+        ref={menuRef}
         className={`md:hidden absolute top-16 left-0 w-full bg-sea-sub-blue shadow-lg z-50 transition-all duration-300 ease-in-out origin-top ${
           isMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
         }`}

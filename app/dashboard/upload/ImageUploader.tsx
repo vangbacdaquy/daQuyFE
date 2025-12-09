@@ -259,6 +259,12 @@ export function ImageUploader() {
                     fill
                     className="object-cover"
                   />
+                  {uploading && uploadProgress[selectedImages[index].name] !== undefined && (
+                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center flex-col z-10">
+                        <div className="w-16 h-16 border-4 border-t-transparent border-sea-gold rounded-full animate-spin"></div>
+                        <p className="text-white mt-2 font-semibold drop-shadow-md">{uploadProgress[selectedImages[index].name]}%</p>
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => removeImage(index)}
@@ -282,12 +288,7 @@ export function ImageUploader() {
                 <p className="mt-1 text-xs text-sea-gray truncate">
                   {selectedImages[index].name}
                 </p>
-                {uploading && uploadProgress[selectedImages[index].name] !== undefined && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center flex-col">
-                        <div className="w-16 h-16 border-4 border-t-transparent border-sea-gold rounded-full animate-spin"></div>
-                        <p className="text-white mt-2">{uploadProgress[selectedImages[index].name]}%</p>
-                    </div>
-                )}
+
               </div>
             ))}
           </div>
