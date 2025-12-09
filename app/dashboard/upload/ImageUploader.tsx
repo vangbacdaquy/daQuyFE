@@ -188,8 +188,8 @@ export function ImageUploader() {
   };
  
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6">
-      <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
+    <div className="bg-sea-sub-blue rounded-lg shadow-lg p-4 sm:p-6 mb-6 border border-sea-gold/20">
+      <h2 className="text-lg sm:text-xl font-semibold text-sea-gold mb-4">
         Upload Images
       </h2>
  
@@ -198,14 +198,14 @@ export function ImageUploader() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`border-2 border-dashed  rounded-lg p-8 sm:p-12 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-8 sm:p-12 text-center cursor-pointer transition-colors ${
           isDragging
-            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-            : "border-zinc-300 dark:border-zinc-600 hover:border-blue-500 dark:hover:border-blue-400"
+            ? "border-sea-gold bg-sea-blue/50"
+            : "border-sea-blue hover:border-sea-gold"
         }`}
       >
         <svg
-          className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-zinc-400"
+          className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-sea-gray"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 48 48"
@@ -218,13 +218,13 @@ export function ImageUploader() {
             strokeLinejoin="round"
           />
         </svg>
-        <p className="mt-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
-          <span className="font-semibold text-blue-600 dark:text-blue-400">
+        <p className="mt-4 text-sm sm:text-base text-sea-light-gray">
+          <span className="font-semibold text-sea-gold">
             Click to upload
           </span>{" "}
           or drag and drop
         </p>
-        <p className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-500">
+        <p className="mt-1 text-xs sm:text-sm text-sea-gray">
           PNG, JPG, GIF, WEBP up to 5MB
         </p>
       </div>
@@ -239,20 +239,20 @@ export function ImageUploader() {
       />
  
       {error && (
-        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mt-4 p-3 bg-red-900/20 border border-red-800 rounded-lg">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
  
       {previews.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+          <h3 className="text-sm font-medium text-sea-light-gray mb-3">
             Selected Images ({previews.length})
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {previews.map((preview, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-700">
+                <div className="aspect-square relative rounded-lg overflow-hidden bg-sea-blue">
                   <Image
                     src={preview}
                     alt={`Preview ${index + 1}`}
@@ -279,12 +279,12 @@ export function ImageUploader() {
                     />
                   </svg>
                 </button>
-                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400 truncate">
+                <p className="mt-1 text-xs text-sea-gray truncate">
                   {selectedImages[index].name}
                 </p>
                 {uploading && uploadProgress[selectedImages[index].name] !== undefined && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center flex-col">
-                        <div className="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+                        <div className="w-16 h-16 border-4 border-t-transparent border-sea-gold rounded-full animate-spin"></div>
                         <p className="text-white mt-2">{uploadProgress[selectedImages[index].name]}%</p>
                     </div>
                 )}
@@ -299,7 +299,7 @@ export function ImageUploader() {
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            className="w-full py-3 px-4 bg-sea-gold hover:bg-yellow-500 disabled:bg-gray-500 text-sea-blue font-bold rounded-lg transition-colors disabled:cursor-not-allowed"
           >
             {uploading ? "Uploading..." : `Upload ${selectedImages.length} Image${selectedImages.length > 1 ? "s" : ""}`}
           </button>
@@ -307,18 +307,18 @@ export function ImageUploader() {
       )}
  
         {processedItems.length > 0 && (
-          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-4 sm:p-6 mt-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
+          <div className="bg-sea-sub-blue rounded-lg shadow-lg p-4 sm:p-6 mt-6 border border-sea-gold/20">
+            <h2 className="text-lg sm:text-xl font-semibold text-sea-gold mb-4">
               Processed Images
             </h2>
             <div className="space-y-6">
               {processedItems.map((item, index) => (
                 <div
                   key={index}
-                  className="flex flex-col md:flex-row items-start gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-lg"
+                  className="flex flex-col md:flex-row items-start gap-4 p-4 bg-sea-blue border border-sea-sub-blue rounded-lg"
                 >
                     <div className="w-full md:w-1/3 flex-shrink-0">
-                        <div className="aspect-square relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-700">
+                        <div className="aspect-square relative rounded-lg overflow-hidden bg-black">
                             <Image
                                 src={item.imageURL}
                                 alt={`Processed image ${item.imageID}`}
@@ -328,16 +328,16 @@ export function ImageUploader() {
                         </div>
                     </div>
                     <div className="w-full md:w-2/3">
-                        <h3 className="font-semibold text-zinc-800 dark:text-zinc-100">
-                            Image ID: <span className="font-normal text-sm text-zinc-600 dark:text-zinc-400 break-all">{item.imageID}</span>
+                        <h3 className="font-semibold text-white">
+                            Image ID: <span className="font-normal text-sm text-sea-gray break-all">{item.imageID}</span>
                         </h3>
-                        <p className="font-semibold text-zinc-800 dark:text-zinc-100 mt-2">
-                            Count: <span className="font-bold text-blue-600 dark:text-blue-400 text-lg">{item.count}</span>
+                        <p className="font-semibold text-white mt-2">
+                            Count: <span className="font-bold text-sea-gold text-lg">{item.count}</span>
                         </p>
-                        <p className="font-semibold text-zinc-800 dark:text-zinc-100 mt-2">
+                        <p className="font-semibold text-white mt-2">
                             Description:
                         </p>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                        <p className="text-sm text-sea-light-gray mt-1">
                             {item.description}
                         </p>
                   </div>

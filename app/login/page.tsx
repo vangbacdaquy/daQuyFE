@@ -29,13 +29,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-sea-blue px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-center mb-2 text-zinc-900 dark:text-zinc-50">
+        <div className="bg-sea-sub-blue rounded-lg shadow-2xl p-8 border border-sea-gold/20">
+          <h2 className="text-3xl font-bold text-center mb-2 text-sea-gold">
             Welcome Back
           </h2>
-          <p className="text-center text-zinc-600 dark:text-zinc-400 mb-8">
+          <p className="text-center text-sea-light-gray mb-8">
             Sign in to your account
           </p>
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                className="block text-sm font-medium text-sea-light-gray mb-2"
               >
                 Email Address
               </label>
@@ -53,7 +53,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-3 rounded-lg border border-sea-blue bg-sea-blue text-white focus:ring-2 focus:ring-sea-gold focus:border-transparent outline-none transition placeholder-gray-500"
                 placeholder="you@example.com"
               />
             </div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+                className="block text-sm font-medium text-sea-light-gray mb-2"
               >
                 Password
               </label>
@@ -71,7 +71,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-3 rounded-lg border border-sea-blue bg-sea-blue text-white focus:ring-2 focus:ring-sea-gold focus:border-transparent outline-none transition placeholder-gray-500"
                 placeholder="••••••••"
               />
             </div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800"
+              className="w-full py-3 px-4 bg-sea-gold hover:bg-yellow-500 disabled:bg-gray-500 text-sea-blue font-bold rounded-lg transition-colors disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-sea-gold focus:ring-offset-2 focus:ring-offset-sea-sub-blue"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
