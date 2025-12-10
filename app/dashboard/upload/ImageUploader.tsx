@@ -1,31 +1,59 @@
 "use client";
  
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { app } from "@/lib/firebase";
 import { v4 as uuidv4 } from 'uuid';
 import Image from "next/image";
+import { useRouter } from "next/navigation";
  
 const storage = getStorage(app);
  
 interface ProcessedItem {
-  imageURL: string; // I'll add the URL here to link it to the image
+  imageURL: string; // Public URL for display
+  gsUri: string;    // GS URI for backend
   imageID: string;
-  count: number;
+  ai_count: number;
   description: string;
+  manual_count?: number;
+  notes?: string;
 }
  
 export function ImageUploader() {
+  const router = useRouter();
   const { user, getJwt } = useAuth();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
+  const [isReportGenerated, setIsReportGenerated] = useState(false);
   const [error, setError] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+ 
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
+ 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 3000);
+  };
  
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -142,7 +170,6 @@ export function ImageUploader() {
     try {
         const uploadResults = await Promise.all(uploadPromises);
         const gsUris = uploadResults.map(result => result.gsUri);
-        const downloadUrls = uploadResults.map(result => result.downloadUrl);
        
         const token = await getJwt();
         const response = await fetch("/api/process-ai", {
@@ -162,21 +189,24 @@ export function ImageUploader() {
         const result = await response.json();
         console.log("Backend response:", result);
  
-        // Assuming the order of items in response matches the order of downloadURLs
         const newProcessedItems: ProcessedItem[] = result.data.items.map((item: any, index: number) => ({
-            ...item,
-            imageURL: downloadUrls[index]
+            imageURL: uploadResults[index].downloadUrl,
+            gsUri: uploadResults[index].gsUri,
+            imageID: item.imageID,
+            ai_count: item.count,
+            description: item.description,
+            manual_count: item.count, // Default manual_count to ai_count
+            notes: "",
         }));
  
-        setProcessedItems(prev => [...prev, ...newProcessedItems]);
+        setProcessedItems(newProcessedItems);
+        setIsReportGenerated(true); // Report is generated, switch UI
  
-        // Clear selections after successful upload and processing
-        setTimeout(() => {
+        // Clear selections as the upload UI will be hidden
             previews.forEach((preview) => URL.revokeObjectURL(preview));
             setSelectedImages([]);
             setPreviews([]);
             setUploadProgress({});
-        }, 2000);
     } catch (err) {
         // Error is already set in the promise rejection or fetch block
         if (err instanceof Error) {
@@ -187,7 +217,81 @@ export function ImageUploader() {
     }
   };
  
+  const handleReportChange = (index: number, field: 'manual_count' | 'notes', value: string | number) => {
+    const updatedItems = [...processedItems];
+    const itemToUpdate = { ...updatedItems[index] };
+ 
+    if (field === 'manual_count') {
+        const numValue = value === '' ? undefined : Number(value);
+        itemToUpdate[field] = isNaN(numValue as number) ? itemToUpdate.manual_count : numValue;
+    } else {
+        itemToUpdate[field] = String(value);
+    }
+   
+    updatedItems[index] = itemToUpdate;
+    setProcessedItems(updatedItems);
+  };
+ 
+  const handleSaveReport = async () => {
+    if (!user) {
+      setError("You must be logged in to save a report.");
+      return;
+    }
+ 
+    setUploading(true); // Show loading state
+    setError("");
+ 
+    const reportPayload = processedItems.map(item => ({
+      image_url: item.gsUri,
+      ai_count: item.ai_count,
+      manual_count: item.manual_count ?? item.ai_count, // Default to ai_count if manual is not set
+      notes: item.notes || "",
+    }));
+ 
+    try {
+      const token = await getJwt();
+      const response = await fetch('/api/save-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(reportPayload),
+      });
+ 
+      const result = await response.json();
+ 
+      if (!response.ok || result.results?.[0]?.status === 'error') {
+        throw new Error(result.results?.[0]?.message || 'Failed to save the report.');
+      }
+ 
+      const successMessage = result.results?.[0]?.message || 'Report saved successfully!';
+      showToast(successMessage);
+      handleNewUpload();
+      redirectTimeoutRef.current = setTimeout(() => {
+        router.push('/dashboard/report');
+      }, 1200);
+ 
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred while saving the report.');
+      }
+    } finally {
+        setUploading(false);
+    }
+  };
+ 
+  const handleNewUpload = () => {
+    setProcessedItems([]);
+    setIsReportGenerated(false);
+    setError("");
+  };
+ 
   return (
+    <>
+      {!isReportGenerated && (
     <div className="bg-sea-sub-blue rounded-lg shadow-lg p-4 sm:p-6 mb-6 border border-sea-gold/20">
       <h2 className="text-lg sm:text-xl font-semibold text-sea-gold mb-4">
         Upload Images
@@ -288,7 +392,7 @@ export function ImageUploader() {
                 <p className="mt-1 text-xs text-sea-gray truncate">
                   {selectedImages[index].name}
                 </p>
-
+ 
               </div>
             ))}
           </div>
@@ -306,8 +410,11 @@ export function ImageUploader() {
           </button>
         </div>
       )}
+        </div>
+      )}
  
-        {processedItems.length > 0 && (
+      {isReportGenerated && processedItems.length > 0 && (
+        <>
           <div className="bg-sea-sub-blue rounded-lg shadow-lg p-4 sm:p-6 mt-6 border border-sea-gold/20">
             <h2 className="text-lg sm:text-xl font-semibold text-sea-gold mb-4">
               Processed Images
@@ -333,10 +440,30 @@ export function ImageUploader() {
                             Image ID: <span className="font-normal text-sm text-sea-gray break-all">{item.imageID}</span>
                         </h3>
                         <p className="font-semibold text-white mt-2">
-                            Count: <span className="font-bold text-sea-gold text-lg">{item.count}</span>
+                            AI Count: <span className="font-bold text-sea-gold text-lg">{item.ai_count}</span>
                         </p>
+                        <div className="mt-2">
+                            <label htmlFor={`manual_count_${index}`} className="font-semibold text-white">Manual Count:</label>
+                            <input
+                                id={`manual_count_${index}`}
+                                type="number"
+                                value={item.manual_count ?? ''}
+                                onChange={(e) => handleReportChange(index, 'manual_count', e.target.value)}
+                                className="mt-1 block w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+                            />
+                        </div>
+                        <div className="mt-2">
+                            <label htmlFor={`notes_${index}`} className="font-semibold text-white">Notes:</label>
+                            <textarea
+                                id={`notes_${index}`}
+                                value={item.notes || ''}
+                                onChange={(e) => handleReportChange(index, 'notes', e.target.value)}
+                                rows={3}
+                                className="mt-1 block w-full p-2 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+                            />
+                        </div>
                         <p className="font-semibold text-white mt-2">
-                            Description:
+                            AI Description:
                         </p>
                         <p className="text-sm text-sea-light-gray mt-1">
                             {item.description}
@@ -346,9 +473,39 @@ export function ImageUploader() {
               ))}
             </div>
           </div>
-        )}
+          <div className="mt-6 flex items-center gap-4">
+            <button
+              onClick={handleSaveReport}
+              disabled={uploading}
+              className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            >
+              {uploading ? 'Saving...' : 'Save Report'}
+            </button>
+            <button
+              onClick={handleNewUpload}
+              disabled={uploading}
+              className="flex-1 py-3 px-4 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            >
+              New Upload
+            </button>
+          </div>
+        </>
+      )}
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
     </div>
+      )}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 z-50 w-[90vw] max-w-sm -translate-x-1/2 rounded-xl bg-green-600/90 px-4 py-3 shadow-2xl backdrop-blur">
+          <p className="text-center text-sm font-semibold text-white">{toastMessage}</p>
+        </div>
+      )}
+    </>
   );
 }
+ 
+ 
+ 
  
  
