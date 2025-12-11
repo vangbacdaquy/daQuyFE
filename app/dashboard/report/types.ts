@@ -1,4 +1,5 @@
 export interface ReportRecord {
+    id?: string;
     ai_count?: number | null;
     created_at?: string | null;
     date_str?: string | null;

@@ -54,7 +54,7 @@ export default function ReportList({
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   {group.records.map((report, index) => (
                     <ReportCard
-                      key={`${group.dateKey}-${report.image_url}`}
+                      key={report.id || `${group.dateKey}-${index}`}
                       report={report}
                       dateKey={group.dateKey}
                       index={index}
