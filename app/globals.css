@@ -30,3 +30,10 @@ body {
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
 }
+
+/* Utilities */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

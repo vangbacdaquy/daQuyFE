@@ -1,76 +1,82 @@
 "use client";
- 
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
- 
+import { UploadCloud, FileText, User } from "lucide-react";
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
- 
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
- 
+
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-sea-blue">
-        <div className="w-16 h-16 border-4 border-t-transparent border-sea-gold rounded-full animate-spin"></div>
+      <div className="min-h-screen p-4 space-y-6 max-w-4xl mx-auto pt-10">
+        <div className="h-24 bg-white/5 rounded-xl animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="h-48 bg-white/5 rounded-xl animate-pulse" />
+            <div className="h-48 bg-white/5 rounded-xl animate-pulse" />
+        </div>
       </div>
     );
   }
 
   // Extract username from email
   const username = user.email ? user.email.split('@')[0] : 'User';
- 
+
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="space-y-6">
       {/* User Info Section */}
-      <div className="max-w-4xl mx-auto mb-8 bg-sea-sub-blue rounded-xl p-6 border border-sea-gold/20 shadow-lg">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full bg-sea-gold flex items-center justify-center text-sea-blue font-bold text-xl shadow-md">
+      <div className="bg-gradient-to-r from-sea-sub-blue to-sea-blue rounded-2xl p-6 border border-white/10 shadow-lg relative overflow-hidden">
+        <div className="relative z-10 flex items-center space-x-4">
+          <div className="w-14 h-14 rounded-full bg-sea-gold flex items-center justify-center text-sea-blue font-bold text-2xl shadow-md ring-4 ring-sea-gold/20">
             {username.charAt(0).toUpperCase()}
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Xin chào, <span className="text-sea-gold">{username}</span></h2>
-            <p className="text-sea-light-gray text-sm">Role: <span className="text-white font-medium">Nhân viên</span></p>
+            <p className="text-sea-light-gray text-sm flex items-center gap-1 mt-1">
+                <User size={14} /> Nhân viên
+            </p>
           </div>
         </div>
+        {/* Decor */}
+        <div className="absolute right-0 top-0 w-32 h-32 bg-sea-gold/10 rounded-full blur-3xl -mr-10 -mt-10" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Upload Photo Card */}
-        <Link href="/dashboard/upload" className="group">
-          <div className="bg-sea-sub-blue rounded-xl shadow-xl p-8 border-2 border-transparent hover:border-sea-gold transition-all duration-300 h-full flex flex-col items-center justify-center text-center transform hover:-translate-y-1">
-            <div className="w-20 h-20 bg-sea-blue rounded-full flex items-center justify-center mb-6 group-hover:bg-sea-gold transition-colors duration-300 shadow-inner">
-              <svg className="w-10 h-10 text-sea-gold group-hover:text-sea-blue transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
+        <Link href="/dashboard/upload" className="group block">
+          <div className="bg-sea-sub-blue/50 rounded-2xl shadow-xl p-6 border border-white/5 hover:border-sea-gold/50 hover:bg-sea-sub-blue transition-all duration-300 h-full flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-6 active:scale-95">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-sea-blue rounded-2xl flex items-center justify-center group-hover:bg-sea-gold transition-colors duration-300 shadow-inner shrink-0">
+              <UploadCloud className="w-8 h-8 sm:w-10 sm:h-10 text-sea-gold group-hover:text-sea-blue transition-colors duration-300" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2 group-hover:text-sea-gold transition-colors">Upload Photo</h2>
-            <p className="text-sea-light-gray text-sm">Tải ảnh lên để AI xử lý</p>
+            <div className="flex-1 text-left sm:text-center">
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-sea-gold transition-colors">Upload Photo</h2>
+                <p className="text-sea-light-gray text-sm">Tải ảnh lên để AI xử lý</p>
+            </div>
           </div>
         </Link>
 
         {/* View Report Card */}
-        <Link href="/dashboard/report" className="group">
-          <div className="bg-sea-sub-blue rounded-xl shadow-xl p-8 border-2 border-transparent hover:border-sea-gold transition-all duration-300 h-full flex flex-col items-center justify-center text-center transform hover:-translate-y-1">
-            <div className="w-20 h-20 bg-sea-blue rounded-full flex items-center justify-center mb-6 group-hover:bg-sea-gold transition-colors duration-300 shadow-inner">
-              <svg className="w-10 h-10 text-sea-gold group-hover:text-sea-blue transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+        <Link href="/dashboard/report" className="group block">
+          <div className="bg-sea-sub-blue/50 rounded-2xl shadow-xl p-6 border border-white/5 hover:border-sea-gold/50 hover:bg-sea-sub-blue transition-all duration-300 h-full flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-6 active:scale-95">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-sea-blue rounded-2xl flex items-center justify-center group-hover:bg-sea-gold transition-colors duration-300 shadow-inner shrink-0">
+              <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-sea-gold group-hover:text-sea-blue transition-colors duration-300" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2 group-hover:text-sea-gold transition-colors">View Reports</h2>
-            <p className="text-sea-light-gray text-sm">Xem báo cáo thống kê hàng ngày</p>
+            <div className="flex-1 text-left sm:text-center">
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-1 group-hover:text-sea-gold transition-colors">View Reports</h2>
+                <p className="text-sea-light-gray text-sm">Xem báo cáo thống kê</p>
+            </div>
           </div>
         </Link>
       </div>
     </div>
   );
 }
-
- 
- 

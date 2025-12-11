@@ -1,4 +1,5 @@
-import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { initializeApp, getApps, cert, getApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 
 // Initialize Firebase Admin only once
@@ -13,5 +14,7 @@ if (!getApps().length) {
   });
 }
 
-export const storage = getStorage();
+export const adminApp = getApp();
+export const adminAuth = getAuth(adminApp);
+export const storage = getStorage(adminApp);
 export const bucket = storage.bucket();
