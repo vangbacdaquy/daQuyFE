@@ -314,7 +314,7 @@ export function ImageUploader() {
             >
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-green-500 text-white flex items-center justify-center text-sm font-bold">2</span>
+                        <span className="w-8 h-8 rounded-lg bg-sea-gold text-sea-blue flex items-center justify-center text-sm font-bold">2</span>
                         Review Results
                     </h2>
                     <button onClick={handleReset} className="text-sea-gray hover:text-white text-sm flex items-center gap-1">
@@ -363,7 +363,7 @@ export function ImageUploader() {
             >
                 <button
                     onClick={handleSaveReport}
-                    className="w-full py-4 bg-green-600 text-white font-bold text-lg rounded-xl shadow-2xl shadow-black/50 hover:bg-green-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-sea-gold text-sea-blue font-bold text-lg rounded-xl shadow-2xl shadow-black/50 hover:bg-yellow-500 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                     <Save size={20} /> Save Report
                 </button>
