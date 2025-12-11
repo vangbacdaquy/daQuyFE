@@ -40,18 +40,26 @@ export default function ReportList({
             No reports for the selected filters. Try expanding your date range or removing the email filter.
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-8">
             {groupedReports.map((group) => (
-              <div key={group.dateKey} className="relative">
-                {/* <span className="absolute left-0 top-1 h-4 w-4 rounded-full border-2 border-sea-gold bg-sea-sub-blue" />
-                <span className="absolute left-1.5 sm:left-2 top-5 bottom-0 w-px bg-gradient-to-b from-sea-gold/70 via-sea-blue/60 to-transparent" aria-hidden /> */}
-
-                <div className="bg-sea-blue/40 border border-sea-blue rounded-full inline-flex items-center gap-3 px-4 py-1 text-sm text-sea-gold font-semibold">
-                  {group.readable}
-                  <span className="text-xs text-sea-light-gray">{group.records.length} item{group.records.length === 1 ? "" : "s"}</span>
+              <div key={group.dateKey} className="relative pb-2">
+                
+                {/* Sticky Date Header 
+                    Top offset adjusted to close gap with filter bar.
+                    Nav (64px) + Filter (~56px) = ~120px. 
+                    Using top-[7.4rem] (~118px) to ensure slight overlap/no gap.
+                */}
+                <div className="sticky top-[7.4rem] z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 mb-4 bg-sea-sub-blue/95 backdrop-blur-md border-y border-sea-blue/50 shadow-lg shadow-black/10 flex items-center justify-between transition-[top]">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sea-gold font-bold text-lg tracking-wide">{group.readable}</span>
+                    <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 text-[10px] font-bold text-sea-blue bg-sea-gold/90 rounded-full">
+                      {group.records.length}
+                    </span>
+                  </div>
+                  <div className="h-px w-16 bg-gradient-to-l from-sea-gold/30 to-transparent" />
                 </div>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {group.records.map((report, index) => (
                     <ReportCard
                       key={report.id || `${group.dateKey}-${index}`}
