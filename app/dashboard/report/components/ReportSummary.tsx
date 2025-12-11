@@ -56,12 +56,12 @@ export default function ReportSummary({ totals }: ReportSummaryProps) {
 
       {/* Variance */}
       <div className="flex items-center gap-3 flex-1 min-w-[120px]">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${isVariance ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors bg-red-500/10 text-red-400`}>
           <ChartIcon />
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-sea-light-gray font-medium">Variance</p>
-          <p className={`text-lg font-bold leading-none mt-0.5 ${isVariance ? "text-red-400" : "text-green-400"}`}>
+          <p className={`text-lg font-bold leading-none mt-0.5 ${isVariance ? "text-red-400" : "text-white-400"}`}>
             {totals.variance > 0 ? "+" : ""}{formatNumber(totals.variance)}
           </p>
         </div>
