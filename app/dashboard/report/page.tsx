@@ -235,8 +235,8 @@ export default function ReportPage() {
       animate={{ opacity: 1 }} 
       className="pb-24" // Bottom padding for mobile nav
     >
-      <div className="bg-sea-sub-blue/50 backdrop-blur-md rounded-2xl shadow-xl border border-sea-gold/10 min-h-[600px] overflow-hidden">
-        <div className="p-6 border-b border-sea-blue bg-sea-blue/50">
+      <div className="bg-sea-sub-blue/50 backdrop-blur-md rounded-2xl shadow-xl border border-sea-gold/10 min-h-[600px]">
+        <div className="p-6 border-b border-sea-blue bg-sea-blue/50 rounded-t-2xl">
           <h2 className="text-xl font-bold text-sea-gold flex items-center gap-2">
             Daily Reports
           </h2>
