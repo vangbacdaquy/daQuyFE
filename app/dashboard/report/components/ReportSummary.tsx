@@ -19,7 +19,7 @@ export default function ReportSummary({ totals }: ReportSummaryProps) {
       </div>
       <div className="bg-sea-blue/40 border border-sea-blue rounded-xl p-4">
         <p className="text-sea-light-gray text-xs uppercase">Variance</p>
-        <p className={`text-2xl font-semibold mt-2 ${totals.variance === 0 ? "text-white" : totals.variance > 0 ? "text-green-300" : "text-red-300"}`}>
+        <p className={`text-2xl font-semibold mt-2 ${totals.variance === 0 ? "text-white" : "text-red-300"}`}>
           {formatNumber(totals.variance)}
         </p>
       </div>
