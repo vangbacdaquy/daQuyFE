@@ -115,6 +115,12 @@ export const formatTimeLabel = (report: ReportRecord) => {
   }).format(parsed);
 };
 
+const getReportTime = (report: ReportRecord) => {
+  const value = report.timestamp_iso || report.created_at;
+  if (!value) return 0;
+  return new Date(value).getTime();
+};
+
 export const groupReportsByDate = (records: ReportRecord[]) => {
   const map = new Map<string, ReportRecord[]>();
   records.forEach((record) => {
@@ -130,11 +136,17 @@ export const groupReportsByDate = (records: ReportRecord[]) => {
     return new Date(b).getTime() - new Date(a).getTime();
   });
 
-  return sortedKeys.map((key) => ({
-    dateKey: key,
-    readable: formatDateHeading(key),
-    records: map.get(key) ?? [],
-  }));
+  return sortedKeys.map((key) => {
+    const groupRecords = map.get(key) ?? [];
+    // Sort records descending (newest first)
+    groupRecords.sort((a, b) => getReportTime(b) - getReportTime(a));
+    
+    return {
+      dateKey: key,
+      readable: formatDateHeading(key),
+      records: groupRecords,
+    };
+  });
 };
 
 export const truncateNotes = (value?: string | null, maxLength = 160) => {

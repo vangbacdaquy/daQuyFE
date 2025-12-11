@@ -26,6 +26,7 @@ import {
 import ReportFilters from "./components/ReportFilters";
 import ReportSummary from "./components/ReportSummary";
 import ReportList from "./components/ReportList";
+import { motion } from "framer-motion";
 
 export default function ReportPage() {
   const router = useRouter();
@@ -217,26 +218,34 @@ export default function ReportPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-sea-blue">
-        <div className="w-16 h-16 border-4 border-t-transparent border-sea-gold rounded-full animate-spin" />
+      <div className="min-h-screen px-4 py-6 space-y-6 max-w-7xl mx-auto">
+        <div className="h-40 bg-white/5 rounded-xl animate-pulse border border-white/5" />
+        <div className="space-y-4">
+             {[1, 2, 3].map(i => (
+                 <div key={i} className="h-24 bg-white/5 rounded-xl animate-pulse" />
+             ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="px-2 py-6 sm:px-0">
-      <div className="bg-sea-sub-blue rounded-lg shadow-xl border border-sea-gold/20 min-h-[600px]">
-        <div className="p-6 border-b border-sea-blue">
-          <h2 className="text-xl font-semibold text-sea-gold">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      className="pb-24" // Bottom padding for mobile nav
+    >
+      <div className="bg-sea-sub-blue/50 backdrop-blur-md rounded-2xl shadow-xl border border-sea-gold/10 min-h-[600px] overflow-hidden">
+        <div className="p-6 border-b border-sea-blue bg-sea-blue/50">
+          <h2 className="text-xl font-bold text-sea-gold flex items-center gap-2">
             Daily Reports
           </h2>
           <p className="text-sm text-sea-light-gray mt-1">
-            Review AI vs manual counts for every upload. Use filters to narrow
-            down by uploader or date range.
+            Review and track jewelry counts.
           </p>
         </div>
 
-        <div className="py-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           <ReportFilters
             filters={filters}
             fetching={fetching}
@@ -249,15 +258,23 @@ export default function ReportPage() {
           />
 
           {dateMismatch && (
-            <div className="bg-red-900/30 border border-red-500/50 text-red-100 text-sm px-4 py-2 rounded-md">
+            <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                className="bg-red-500/10 border border-red-500/50 text-red-200 text-sm px-4 py-2 rounded-lg"
+            >
               Start date cannot be after end date.
-            </div>
+            </motion.div>
           )}
 
           {error && (
-            <div className="bg-red-900/30 border border-red-500/40 text-red-100 px-4 py-3 rounded-md text-sm">
+            <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           <ReportSummary totals={totals} />
@@ -270,6 +287,6 @@ export default function ReportPage() {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
