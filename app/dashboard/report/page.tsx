@@ -37,6 +37,9 @@ export default function ReportPage() {
     ...getDefaultDateRange(),
   }));
 
+  // Debounce: Store the filters used for fetching separately
+  const [debouncedFilters, setDebouncedFilters] = useState<FiltersState>(filters);
+
   const [reports, setReports] = useState<ReportRecord[]>([]);
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [fetching, setFetching] = useState(false);
@@ -48,6 +51,17 @@ export default function ReportPage() {
       router.push("/login");
     }
   }, [loading, user, router]);
+
+  // Debounce Effect: Update debouncedFilters after delay
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [filters]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -78,20 +92,16 @@ export default function ReportPage() {
   }, [user, getJwt]);
 
   const fetchReports = useCallback(
-    async (override?: Partial<FiltersState>) => {
+    async (filtersToUse: FiltersState) => {
       if (!user) {
         return;
       }
 
-      const params = {
-        ...filters,
-        ...override,
-      };
-
+      // Check for valid date range before fetching
       if (
-        params.startDate &&
-        params.endDate &&
-        params.startDate > params.endDate
+        filtersToUse.startDate &&
+        filtersToUse.endDate &&
+        filtersToUse.startDate > filtersToUse.endDate
       ) {
         setError("Start date must be before end date.");
         return;
@@ -107,14 +117,14 @@ export default function ReportPage() {
         }
 
         const query = new URLSearchParams();
-        if (params.userEmail.trim()) {
-          query.set("user_email", params.userEmail.trim());
+        if (filtersToUse.userEmail.trim()) {
+          query.set("user_email", filtersToUse.userEmail.trim());
         }
-        if (params.startDate) {
-          query.set("start_date", params.startDate);
+        if (filtersToUse.startDate) {
+          query.set("start_date", filtersToUse.startDate);
         }
-        if (params.endDate) {
-          query.set("end_date", params.endDate);
+        if (filtersToUse.endDate) {
+          query.set("end_date", filtersToUse.endDate);
         }
 
         const queryString = query.toString();
@@ -144,14 +154,15 @@ export default function ReportPage() {
         setFetching(false);
       }
     },
-    [user, filters, getJwt]
+    [user, getJwt]
   );
 
+  // Trigger fetch when debounced filters change
   useEffect(() => {
     if (!loading && user) {
-      fetchReports();
+      fetchReports(debouncedFilters);
     }
-  }, [loading, user, fetchReports]);
+  }, [loading, user, debouncedFilters, fetchReports]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -162,13 +173,15 @@ export default function ReportPage() {
 
   const handleApplyFilters = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    fetchReports();
+    // Force immediate update to debounced filters (bypassing timer)
+    setDebouncedFilters(filters);
   };
 
   const handleResetFilters = () => {
     const defaults = { userEmail: "", ...getDefaultDateRange() };
     setFilters(defaults);
-    fetchReports(defaults);
+    // Immediate reset
+    setDebouncedFilters(defaults);
   };
 
   const handleApplyPresetRange = (days: number) => {
@@ -180,8 +193,13 @@ export default function ReportPage() {
       endDate: endDateValue,
     };
 
-    setFilters((prev) => ({ ...prev, ...range }));
-    fetchReports(range);
+    setFilters((prev) => {
+      const next = { ...prev, ...range };
+      return next;
+    });
+    // For presets, we usually want immediate feedback, but letting it debounce is also fine.
+    // If you want immediate:
+    // setDebouncedFilters(prev => ({ ...prev, ...range }));
   };
 
   const dateMismatch = Boolean(
