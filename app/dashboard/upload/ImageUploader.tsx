@@ -211,6 +211,19 @@ export function ImageUploader() {
     const updatedItems = [...processedItems];
     const itemToUpdate = { ...updatedItems[index] };
 
+    if (field === 'manual_count') {
+      if (value === '') {
+        itemToUpdate.manual_count = undefined;
+      } else {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
+          itemToUpdate.manual_count = numValue;
+        }
+      }
+    } else {
+      itemToUpdate[field] = String(value);
+    }
+
     updatedItems[index] = itemToUpdate;
     setProcessedItems(updatedItems);
   };
