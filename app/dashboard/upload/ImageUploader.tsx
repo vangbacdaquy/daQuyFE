@@ -11,6 +11,7 @@ import { ImagePreview } from "./components/ImagePreview";
 import { ProcessedImageCard } from "./components/ProcessedImageCard";
 import { Toast } from "./components/Toast";
 import { ErrorAlert } from "./components/ErrorAlert";
+import { RateLimitModal } from "../components/RateLimitModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Save, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,9 @@ interface ProcessedItem {
   gsUri: string;
   imageID: string;
   ai_count: number;
-  description: string;
+  counting_logic: string;
+  layout_type?: string;
+  item_type?: string;
   manual_count?: number;
   notes?: string;
 }
@@ -40,6 +43,10 @@ export function ImageUploader() {
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
   const [error, setError] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [rateLimitModal, setRateLimitModal] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -144,10 +151,6 @@ export function ImageUploader() {
       const uploadResults = await Promise.all(uploadPromises);
       
       // 2. Call AI Processing
-      setStep("processing");
-      const gsUris = uploadResults.map(result => result.gsUri);
-      const token = await getJwt();
-      
       const response = await fetch("/api/process-ai", {
         method: "POST",
         headers: {
@@ -160,6 +163,16 @@ export function ImageUploader() {
         }),
       });
 
+      if (response.status === 429) {
+        const errorData = await response.json();
+        setRateLimitModal({
+          isOpen: true,
+          message: errorData.detail || "Bạn đã hết lượt thử. Vui lòng đợi một chút.",
+        });
+        setStep("selected");
+        return;
+      }
+
       if (!response.ok) throw new Error("Backend processing failed.");
       
       const result = await response.json();
@@ -169,9 +182,15 @@ export function ImageUploader() {
         gsUri: uploadResults[index].gsUri,
         imageID: item.imageID,
         ai_count: item.count,
-        description: item.description,
+        counting_logic: item.counting_logic,
+        layout_type: item.layout_type,
+        item_type: item.item_type,
         manual_count: item.count,
         notes: "",
+      }));
+
+      setProcessedItems(newProcessedItems);
+      setStep("complete");
       }));
 
       setProcessedItems(newProcessedItems);
@@ -199,23 +218,11 @@ export function ImageUploader() {
     } else {
       itemToUpdate[field] = String(value);
     }
-
-    updatedItems[index] = itemToUpdate;
-    setProcessedItems(updatedItems);
-  };
-
-  const handleSaveReport = async () => {
-    if (!user) return;
-    
-    // Optimistic UI could go here, but for now just a spinner state if needed
-    // We reuse 'uploading' step for saving for simplicity or add a 'saving' step
-    // But let's keep it simple: just show a toast and redirect
-    
-    const reportPayload = processedItems.map(item => ({
+      const reportPayload = processedItems.map(item => ({
       image_url: item.gsUri,
       ai_count: item.ai_count,
       manual_count: item.manual_count ?? item.ai_count,
-      ai_description: item.description,
+      ai_description: item.counting_logic,
       notes: item.notes || "",
     }));
 
@@ -230,9 +237,33 @@ export function ImageUploader() {
         body: JSON.stringify(reportPayload),
       });
 
-      if (!response.ok) throw new Error('Failed to save report');
+      if (response.status === 429) {
+        const errorData = await response.json();
+        setRateLimitModal({
+          isOpen: true,
+          message: errorData.detail || "Bạn đã hết lượt thử. Vui lòng đợi một chút.",
+        });
+        return;
+      }
+
+      if (!response.ok) throw new Error('Failed to save report');      const token = await getJwt();
+      const response = await fetch('/api/save-report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(reportPayload),
+      });
+  return (
+    <div className="pb-24"> {/* Extra padding for sticky bottom actions */}
+      <RateLimitModal 
+        isOpen={rateLimitModal.isOpen} 
+        onClose={() => setRateLimitModal(prev => ({ ...prev, isOpen: false }))} 
+        message={rateLimitModal.message} 
+      />
       
-      showToast("Report saved successfully!");
+      {/* --- Step 1 & 2: Upload & Preview --- */}
       setTimeout(() => router.push('/dashboard/report'), 1000);
       
     } catch (err: any) {

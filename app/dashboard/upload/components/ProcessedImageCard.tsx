@@ -8,7 +8,9 @@ interface ProcessedItem {
   gsUri: string;
   imageID: string;
   ai_count: number;
-  description: string;
+  counting_logic: string;
+  layout_type?: string;
+  item_type?: string;
   manual_count?: number;
   notes?: string;
 }
@@ -67,6 +69,20 @@ export function ProcessedImageCard({
                 {item.ai_count}
               </span>
             </div>
+            {(item.item_type || item.layout_type) && (
+              <div className="flex gap-2 mt-1">
+                {item.item_type && (
+                  <span className="px-2 py-0.5 rounded text-xs bg-sea-sub-blue text-sea-light-gray border border-sea-gray/30">
+                    {item.item_type}
+                  </span>
+                )}
+                {item.layout_type && (
+                  <span className="px-2 py-0.5 rounded text-xs bg-sea-sub-blue text-sea-light-gray border border-sea-gray/30">
+                    {item.layout_type}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick Stats (visible when collapsed if data exists) */}
@@ -157,15 +173,15 @@ export function ProcessedImageCard({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
+            {/* Column 1: AI Data */}
+            <div>
+              <h4 className="text-xs font-bold text-sea-gray uppercase mb-2">
+                Counting Logic
+              </h4>
+              <p className="text-sm text-sea-light-gray leading-relaxed">
+                {item.counting_logic || "No logic details available."}
+              </p>
+            </div>
 
       {/* --- Expanded Section: Description & Form --- */}
       {isExpanded && (
