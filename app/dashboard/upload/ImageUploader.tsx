@@ -156,7 +156,7 @@ export function ImageUploader() {
         },
         body: JSON.stringify({ 
             file_uris: gsUris, 
-            prompt: "đếm và giải thích cho tôi có bao nhiêu món trang sức trong khay này" 
+            prompt: "" 
         }),
       });
 
