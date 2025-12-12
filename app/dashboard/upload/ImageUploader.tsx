@@ -149,8 +149,10 @@ export function ImageUploader() {
       });
 
       const uploadResults = await Promise.all(uploadPromises);
+      const gsUris = uploadResults.map(res => res.gsUri);
       
       // 2. Call AI Processing
+      const token = await getJwt();
       const response = await fetch("/api/process-ai", {
         method: "POST",
         headers: {
@@ -191,10 +193,6 @@ export function ImageUploader() {
 
       setProcessedItems(newProcessedItems);
       setStep("complete");
-      }));
-
-      setProcessedItems(newProcessedItems);
-      setStep("complete");
       
       // Cleanup previews
       previews.forEach((preview) => URL.revokeObjectURL(preview));
@@ -212,13 +210,14 @@ export function ImageUploader() {
     const updatedItems = [...processedItems];
     const itemToUpdate = { ...updatedItems[index] };
 
-    if (field === 'manual_count') {
-      const numValue = value === '' ? undefined : Number(value);
-      itemToUpdate[field] = isNaN(numValue as number) ? itemToUpdate.manual_count : numValue;
-    } else {
-      itemToUpdate[field] = String(value);
-    }
-      const reportPayload = processedItems.map(item => ({
+    updatedItems[index] = itemToUpdate;
+    setProcessedItems(updatedItems);
+  };
+
+  const handleSaveReport = async () => {
+    if (!user) return;
+    
+    const reportPayload = processedItems.map(item => ({
       image_url: item.gsUri,
       ai_count: item.ai_count,
       manual_count: item.manual_count ?? item.ai_count,
@@ -246,24 +245,9 @@ export function ImageUploader() {
         return;
       }
 
-      if (!response.ok) throw new Error('Failed to save report');      const token = await getJwt();
-      const response = await fetch('/api/save-report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(reportPayload),
-      });
-  return (
-    <div className="pb-24"> {/* Extra padding for sticky bottom actions */}
-      <RateLimitModal 
-        isOpen={rateLimitModal.isOpen} 
-        onClose={() => setRateLimitModal(prev => ({ ...prev, isOpen: false }))} 
-        message={rateLimitModal.message} 
-      />
+      if (!response.ok) throw new Error('Failed to save report');
       
-      {/* --- Step 1 & 2: Upload & Preview --- */}
+      showToast("Report saved successfully!");
       setTimeout(() => router.push('/dashboard/report'), 1000);
       
     } catch (err: any) {

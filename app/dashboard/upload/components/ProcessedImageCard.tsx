@@ -53,6 +53,7 @@ export function ProcessedImageCard({
             src={item.imageURL}
             alt={`Processed image ${item.imageID}`}
             fill
+            sizes="64px"
             className="object-cover"
           />
         </div>
@@ -148,40 +149,23 @@ export function ProcessedImageCard({
             className="p-2 text-sea-gray hover:text-white hover:bg-white/10 rounded-md transition-colors"
             title={isExpanded ? "Collapse" : "Expand Details"}
           >
-            {isExpanded ? (
-              // Chevron Up
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m18 15-6-6-6 6" />
-              </svg>
-            ) : (
-              // Chevron Down
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-            {/* Column 1: AI Data */}
-            <div>
-              <h4 className="text-xs font-bold text-sea-gray uppercase mb-2">
-                Counting Logic
-              </h4>
-              <p className="text-sm text-sea-light-gray leading-relaxed">
-                {item.counting_logic || "No logic details available."}
-              </p>
-            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       {/* --- Expanded Section: Description & Form --- */}
       {isExpanded && (
@@ -190,10 +174,10 @@ export function ProcessedImageCard({
             {/* Column 1: AI Data */}
             <div>
               <h4 className="text-xs font-bold text-sea-gray uppercase mb-2">
-                AI Description
+                Counting Logic
               </h4>
               <p className="text-sm text-sea-light-gray leading-relaxed">
-                {item.description || "No description available."}
+                {item.counting_logic || "No logic details available."}
               </p>
             </div>
 
