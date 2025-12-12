@@ -152,6 +152,7 @@ export function ImageUploader() {
       const gsUris = uploadResults.map(res => res.gsUri);
       
       // 2. Call AI Processing
+      setStep("processing");
       const token = await getJwt();
       const response = await fetch("/api/process-ai", {
         method: "POST",

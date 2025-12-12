@@ -309,6 +309,8 @@ export default function ReportPage() {
               {error}
             </motion.div>
           )}
+          
+          <ReportSummary totals={totals} />
 
           <ReportList
             groupedReports={groupedReports}
