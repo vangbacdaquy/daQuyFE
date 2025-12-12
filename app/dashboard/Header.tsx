@@ -34,6 +34,7 @@ export default function DashboardHeader() {
                       src="https://vietjewelers.com/cdn/shop/files/Logo_Ch.png?v=1718962467&width=400"
                       alt="Viet Jewelers"
                       fill
+                      sizes="144px"
                       className="object-contain"
                       priority
                   />

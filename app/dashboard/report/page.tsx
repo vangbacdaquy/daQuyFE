@@ -26,6 +26,7 @@ import {
 import ReportFilters from "./components/ReportFilters";
 import ReportSummary from "./components/ReportSummary";
 import ReportList from "./components/ReportList";
+import { RateLimitModal } from "../components/RateLimitModal";
 import { motion } from "framer-motion";
 
 export default function ReportPage() {
@@ -45,6 +46,10 @@ export default function ReportPage() {
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [rateLimitModal, setRateLimitModal] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -136,6 +141,16 @@ export default function ReportPage() {
             },
           }
         );
+
+        if (response.status === 429) {
+          const errorData = await response.json();
+          setRateLimitModal({
+            isOpen: true,
+            message: errorData.detail || "Bạn đã hết lượt thử. Vui lòng đợi một chút.",
+          });
+          setFetching(false);
+          return;
+        }
 
         const payload = await response.json();
         if (!response.ok) {
@@ -293,11 +308,16 @@ export default function ReportPage() {
             >
               {error}
             </motion.div>
-          )}
-
-          <ReportSummary totals={totals} />
-
-          <ReportList
+        </div>
+      </div>
+      <RateLimitModal 
+        isOpen={rateLimitModal.isOpen} 
+        onClose={() => setRateLimitModal(prev => ({ ...prev, isOpen: false }))} 
+        message={rateLimitModal.message} 
+      />
+    </motion.div>
+  );
+}         <ReportList
             groupedReports={groupedReports}
             fetching={fetching}
             reportsCount={reports.length}

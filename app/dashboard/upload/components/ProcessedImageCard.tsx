@@ -8,7 +8,9 @@ interface ProcessedItem {
   gsUri: string;
   imageID: string;
   ai_count: number;
-  description: string;
+  counting_logic: string;
+  layout_type?: string;
+  item_type?: string;
   manual_count?: number;
   notes?: string;
 }
@@ -51,6 +53,7 @@ export function ProcessedImageCard({
             src={item.imageURL}
             alt={`Processed image ${item.imageID}`}
             fill
+            sizes="64px"
             className="object-cover"
           />
         </div>
@@ -67,6 +70,20 @@ export function ProcessedImageCard({
                 {item.ai_count}
               </span>
             </div>
+            {(item.item_type || item.layout_type) && (
+              <div className="flex gap-2 mt-1">
+                {item.item_type && (
+                  <span className="px-2 py-0.5 rounded text-xs bg-sea-sub-blue text-sea-light-gray border border-sea-gray/30">
+                    {item.item_type}
+                  </span>
+                )}
+                {item.layout_type && (
+                  <span className="px-2 py-0.5 rounded text-xs bg-sea-sub-blue text-sea-light-gray border border-sea-gray/30">
+                    {item.layout_type}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick Stats (visible when collapsed if data exists) */}
@@ -132,37 +149,20 @@ export function ProcessedImageCard({
             className="p-2 text-sea-gray hover:text-white hover:bg-white/10 rounded-md transition-colors"
             title={isExpanded ? "Collapse" : "Expand Details"}
           >
-            {isExpanded ? (
-              // Chevron Up
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m18 15-6-6-6 6" />
-              </svg>
-            ) : (
-              // Chevron Down
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            )}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
         </div>
       </div>
@@ -174,10 +174,10 @@ export function ProcessedImageCard({
             {/* Column 1: AI Data */}
             <div>
               <h4 className="text-xs font-bold text-sea-gray uppercase mb-2">
-                AI Description
+                Counting Logic
               </h4>
               <p className="text-sm text-sea-light-gray leading-relaxed">
-                {item.description || "No description available."}
+                {item.counting_logic || "No logic details available."}
               </p>
             </div>
 
