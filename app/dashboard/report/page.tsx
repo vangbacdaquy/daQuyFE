@@ -308,16 +308,9 @@ export default function ReportPage() {
             >
               {error}
             </motion.div>
-        </div>
-      </div>
-      <RateLimitModal 
-        isOpen={rateLimitModal.isOpen} 
-        onClose={() => setRateLimitModal(prev => ({ ...prev, isOpen: false }))} 
-        message={rateLimitModal.message} 
-      />
-    </motion.div>
-  );
-}         <ReportList
+          )}
+
+          <ReportList
             groupedReports={groupedReports}
             fetching={fetching}
             reportsCount={reports.length}
@@ -325,6 +318,12 @@ export default function ReportPage() {
           />
         </div>
       </div>
+
+      <RateLimitModal 
+        isOpen={rateLimitModal.isOpen} 
+        onClose={() => setRateLimitModal(prev => ({ ...prev, isOpen: false }))} 
+        message={rateLimitModal.message} 
+      />
     </motion.div>
   );
 }
