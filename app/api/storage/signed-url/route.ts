@@ -40,7 +40,13 @@ export async function POST(request: NextRequest) {
       expires: Date.now() + 60 * 60 * 1000, // 1 hour from now
     });
  
-    return NextResponse.json({ signedUrl }, { status: 200 });
+    // Cache signed URLs for 50 minutes (less than expiration time)
+    return NextResponse.json({ signedUrl }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'private, max-age=3000, immutable',
+      }
+    });
   } catch (error) {
     console.error("Signed URL generation error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate signed URL";

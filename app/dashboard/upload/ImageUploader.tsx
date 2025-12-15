@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { app } from "@/lib/firebase";
@@ -14,7 +14,6 @@ import { ErrorAlert } from "./components/ErrorAlert";
 import { RateLimitModal } from "../components/RateLimitModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Save, RotateCcw } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const storage = getStorage(app);
 
@@ -60,15 +59,15 @@ export function ImageUploader() {
       // Cleanup object URLs
       previews.forEach(p => URL.revokeObjectURL(p));
     };
-  }, []);
+  }, [previews]);
 
-  const showToast = (message: string) => {
+  const showToast = useCallback((message: string) => {
     setToastMessage(message);
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 3000);
-  };
+  }, []);
 
-  const handleFilesSelected = (files: File[]) => {
+  const handleFilesSelected = useCallback((files: File[]) => {
     setError("");
     const validFiles: File[] = [];
     const newPreviews: string[] = [];
@@ -91,9 +90,9 @@ export function ImageUploader() {
       setPreviews((prev) => [...prev, ...newPreviews]);
       if (step === "idle") setStep("selected");
     }
-  };
+  }, [step, showToast]);
 
-  const removeImage = (index: number) => {
+  const removeImage = useCallback((index: number) => {
     URL.revokeObjectURL(previews[index]);
     const newImages = selectedImages.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
@@ -104,9 +103,9 @@ export function ImageUploader() {
     if (newImages.length === 0) {
       setStep("idle");
     }
-  };
+  }, [selectedImages, previews]);
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (selectedImages.length === 0) return;
     if (!user) {
       setError("You must be logged in to upload files.");
@@ -205,9 +204,9 @@ export function ImageUploader() {
       setError(err.message || "Something went wrong.");
       setStep("selected"); // Go back so they can try again
     }
-  };
+  }, [selectedImages, user, getJwt, previews]);
 
-  const handleReportChange = (index: number, field: 'manual_count' | 'notes', value: string | number) => {
+  const handleReportChange = useCallback((index: number, field: 'manual_count' | 'notes', value: string | number) => {
     const updatedItems = [...processedItems];
     const itemToUpdate = { ...updatedItems[index] };
 
@@ -226,9 +225,9 @@ export function ImageUploader() {
 
     updatedItems[index] = itemToUpdate;
     setProcessedItems(updatedItems);
-  };
+  }, [processedItems]);
 
-  const handleSaveReport = async () => {
+  const handleSaveReport = useCallback(async () => {
     if (!user) return;
     
     const reportPayload = processedItems.map(item => ({
@@ -267,15 +266,15 @@ export function ImageUploader() {
     } catch (err: any) {
       setError(err.message);
     }
-  };
+  }, [user, processedItems, getJwt, showToast, router]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setProcessedItems([]);
     setSelectedImages([]);
     setPreviews([]);
     setStep("idle");
     setError("");
-  };
+  }, []);
 
   return (
     <div className="pb-24"> {/* Extra padding for sticky bottom actions */}

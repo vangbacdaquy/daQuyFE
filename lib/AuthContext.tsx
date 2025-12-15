@@ -6,6 +6,8 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useMemo,
+  useCallback,
 } from "react";
 import { onAuthStateChanged, getAuth, User, IdTokenResult } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => unsubscribe();
   }, []);
 
-  const getJwt = async (): Promise<string | null> => {
+  const getJwt = useCallback(async (): Promise<string | null> => {
     if (!user) return null;
     try {
       const idTokenResult: IdTokenResult = await user.getIdTokenResult();
@@ -52,13 +54,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.error("Error getting JWT:", error);
       return null;
     }
-  };
+  }, [user]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     getJwt,
-  };
+  }), [user, loading, getJwt]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

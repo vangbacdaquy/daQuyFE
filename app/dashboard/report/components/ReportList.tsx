@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, memo } from "react";
 import ReportCard from "./ReportCard";
 import { GroupedReport } from "../types";
 import { formatDisplayDate } from "../utils";
@@ -13,7 +13,7 @@ interface ReportListProps {
   onLoadMore: () => void;
 }
 
-export default function ReportList({
+const ReportList = memo(function ReportList({
   groupedReports,
   fetching,
   reportsCount,
@@ -118,4 +118,6 @@ export default function ReportList({
       </div>
     </>
   );
-}
+});
+
+export default ReportList;

@@ -123,12 +123,17 @@ const getReportTime = (report: ReportRecord) => {
 
 export const groupReportsByDate = (records: ReportRecord[]) => {
   const map = new Map<string, ReportRecord[]>();
-  records.forEach((record) => {
+  
+  // More efficient grouping - avoid creating intermediate arrays
+  for (const record of records) {
     const key = getDateKey(record);
-    const existing = map.get(key) ?? [];
-    existing.push(record);
-    map.set(key, existing);
-  });
+    const existing = map.get(key);
+    if (existing) {
+      existing.push(record);
+    } else {
+      map.set(key, [record]);
+    }
+  }
 
   const sortedKeys = Array.from(map.keys()).sort((a, b) => {
     if (a === "Unknown") return 1;

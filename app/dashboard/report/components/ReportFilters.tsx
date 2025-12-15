@@ -1,5 +1,5 @@
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState, memo } from "react";
 import { AuthUser, FiltersState } from "../types";
 import { PRESET_RANGES, toDateInputValue } from "../utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +22,7 @@ interface ReportFiltersProps {
   dateMismatch: boolean;
 }
 
-export default function ReportFilters({
+const ReportFilters = memo(function ReportFilters({
   filters,
   fetching,
   users,
@@ -181,4 +181,6 @@ export default function ReportFilters({
       </div>
     </>
   );
-}
+});
+
+export default ReportFilters;

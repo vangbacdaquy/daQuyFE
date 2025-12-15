@@ -1,6 +1,6 @@
 "use client";
  
-import { useState } from "react";
+import { useState, memo } from "react";
 import Image from "next/image";
 import { ReportRecord } from "../types";
 import { formatTimeLabel, truncateNotes } from "../utils";
@@ -35,7 +35,7 @@ const RobotIcon = () => (
   </svg>
 );
  
-export default function ReportCard({ report, dateKey, index }: ReportCardProps) {
+const ReportCard = memo(function ReportCard({ report, dateKey, index }: ReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
  
   const signedImageUrl = useSignedUrl(report.image_url);
@@ -127,4 +127,6 @@ export default function ReportCard({ report, dateKey, index }: ReportCardProps) 
       </div>
     </button>
   );
-}
+});
+
+export default ReportCard;

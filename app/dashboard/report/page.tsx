@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  memo,
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
@@ -212,25 +213,25 @@ export default function ReportPage() {
     }
   }, [loading, user, debouncedFilters, fetchReports]);
 
-  const handleInputChange = (
+  const handleInputChange = useCallback((
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleApplyFilters = (event: FormEvent<HTMLFormElement>) => {
+  const handleApplyFilters = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setDebouncedFilters(filters);
-  };
+  }, [filters]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     const defaults = { userEmail: "", ...getDefaultDateRange() };
     setFilters(defaults);
     setDebouncedFilters(defaults);
-  };
+  }, []);
 
-  const handleApplyPresetRange = (days: number) => {
+  const handleApplyPresetRange = useCallback((days: number) => {
     const endDateValue = toDateInputValue(new Date());
     const startDateBase = new Date();
     startDateBase.setDate(startDateBase.getDate() - days);
@@ -243,7 +244,7 @@ export default function ReportPage() {
       const next = { ...prev, ...range };
       return next;
     });
-  };
+  }, []);
   
   const handleLoadMore = useCallback(() => {
     const lastRecord = reports[reports.length - 1];

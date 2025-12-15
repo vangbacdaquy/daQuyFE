@@ -51,7 +51,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: errorMessage }, { status: response.status });
     }
  
-    return NextResponse.json(payload, { status: 200 });
+    // Add cache control headers for better performance
+    return NextResponse.json(payload, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+      }
+    });
   } catch (error) {
     console.error("Reports API Error:", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";
