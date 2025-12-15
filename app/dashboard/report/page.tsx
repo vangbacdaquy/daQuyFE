@@ -44,6 +44,8 @@ export default function ReportPage() {
   const [reports, setReports] = useState<ReportRecord[]>([]);
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [fetching, setFetching] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [rateLimitModal, setRateLimitModal] = useState<{ isOpen: boolean; message: string }>({
@@ -97,7 +99,10 @@ export default function ReportPage() {
   }, [user, getJwt]);
 
   const fetchReports = useCallback(
-    async (filtersToUse: FiltersState) => {
+    async (
+      filtersToUse: FiltersState, 
+      cursor?: { created_at: string; image_url: string }
+    ) => {
       if (!user) {
         return;
       }
@@ -112,7 +117,14 @@ export default function ReportPage() {
         return;
       }
 
-      setFetching(true);
+      const isLoadMore = !!cursor;
+      
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setFetching(true);
+      }
+      
       setError(null);
 
       try {
@@ -131,6 +143,11 @@ export default function ReportPage() {
         if (filtersToUse.endDate) {
           query.set("end_date", filtersToUse.endDate);
         }
+        
+        if (cursor) {
+           query.set("last_created_at", cursor.created_at);
+           query.set("last_image_url", cursor.image_url);
+        }
 
         const queryString = query.toString();
         const response = await fetch(
@@ -148,7 +165,6 @@ export default function ReportPage() {
             isOpen: true,
             message: errorData.detail || "Bạn đã hết lượt thử. Vui lòng đợi một chút.",
           });
-          setFetching(false);
           return;
         }
 
@@ -157,24 +173,41 @@ export default function ReportPage() {
           throw new Error(payload?.error || "Failed to fetch reports");
         }
 
-        setReports(normalizeReports(payload));
+        const newReports = normalizeReports(payload);
+        
+        if (isLoadMore) {
+          setReports((prev) => [...prev, ...newReports]);
+        } else {
+          setReports(newReports);
+        }
+        
+        setHasMore(newReports.length >= 20);
         setLastUpdated(new Date().toISOString());
       } catch (err) {
         console.error("Report fetch error", err);
         const message =
           err instanceof Error ? err.message : "Unexpected error";
         setError(message);
-        setReports([]);
+        if (!isLoadMore) {
+          setReports([]);
+        }
       } finally {
-        setFetching(false);
+        if (isLoadMore) {
+          setLoadingMore(false);
+        } else {
+          setFetching(false);
+        }
       }
     },
     [user, getJwt]
   );
 
-  // Trigger fetch when debounced filters change
+  // Trigger fetch when debounced filters change (initial fetch / reset)
   useEffect(() => {
     if (!loading && user) {
+      // Reset reports when filters change is usually implicit by fetchReports overwriting state
+      // But if we want to clear previous state immediately for better UX:
+      // setReports([]); // Optional
       fetchReports(debouncedFilters);
     }
   }, [loading, user, debouncedFilters, fetchReports]);
@@ -188,14 +221,12 @@ export default function ReportPage() {
 
   const handleApplyFilters = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Force immediate update to debounced filters (bypassing timer)
     setDebouncedFilters(filters);
   };
 
   const handleResetFilters = () => {
     const defaults = { userEmail: "", ...getDefaultDateRange() };
     setFilters(defaults);
-    // Immediate reset
     setDebouncedFilters(defaults);
   };
 
@@ -212,10 +243,18 @@ export default function ReportPage() {
       const next = { ...prev, ...range };
       return next;
     });
-    // For presets, we usually want immediate feedback, but letting it debounce is also fine.
-    // If you want immediate:
-    // setDebouncedFilters(prev => ({ ...prev, ...range }));
   };
+  
+  const handleLoadMore = useCallback(() => {
+    const lastRecord = reports[reports.length - 1];
+    if (!lastRecord) return;
+    
+    // Pass the cursor info
+    fetchReports(debouncedFilters, { 
+      created_at: lastRecord.created_at || "", 
+      image_url: lastRecord.image_url || "" 
+    });
+  }, [reports, debouncedFilters, fetchReports]);
 
   const dateMismatch = Boolean(
     filters.startDate && filters.endDate && filters.startDate > filters.endDate
@@ -317,6 +356,9 @@ export default function ReportPage() {
             fetching={fetching}
             reportsCount={reports.length}
             lastUpdated={lastUpdated}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadMore={handleLoadMore}
           />
         </div>
       </div>

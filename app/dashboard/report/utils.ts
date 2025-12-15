@@ -138,8 +138,7 @@ export const groupReportsByDate = (records: ReportRecord[]) => {
 
   return sortedKeys.map((key) => {
     const groupRecords = map.get(key) ?? [];
-    // Sort records descending (newest first)
-    groupRecords.sort((a, b) => getReportTime(b) - getReportTime(a));
+    // Records are expected to be pre-sorted from API/store.
     
     return {
       dateKey: key,

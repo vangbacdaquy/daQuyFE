@@ -15,19 +15,22 @@ export async function GET(request: NextRequest) {
  
     const { searchParams } = new URL(request.url);
     const query = new URLSearchParams();
-    const userEmail = searchParams.get("user_email");
-    const startDate = searchParams.get("start_date");
-    const endDate = searchParams.get("end_date");
- 
-    if (userEmail) {
-      query.set("user_email", userEmail);
-    }
-    if (startDate) {
-      query.set("start_date", startDate);
-    }
-    if (endDate) {
-      query.set("end_date", endDate);
-    }
+    
+    // Whitelist parameters to forward
+    const paramsToForward = [
+      "user_email", 
+      "start_date", 
+      "end_date", 
+      "last_created_at", 
+      "last_image_url"
+    ];
+
+    paramsToForward.forEach(key => {
+      const value = searchParams.get(key);
+      if (value) {
+        query.set(key, value);
+      }
+    });
  
     const queryString = query.toString();
     const url = queryString ? `${backendUrl}/reports?${queryString}` : `${backendUrl}/reports`;
@@ -55,5 +58,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
- 
- 

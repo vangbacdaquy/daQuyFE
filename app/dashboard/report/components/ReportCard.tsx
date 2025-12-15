@@ -61,7 +61,7 @@ export default function ReportCard({ report, dateKey, index }: ReportCardProps) 
               fill
               className="object-cover"
               sizes="(max-width: 640px) 64px, 80px"
-              unoptimized
+              loading="lazy"
             />
           )}
         </div>

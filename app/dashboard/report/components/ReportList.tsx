@@ -1,4 +1,4 @@
-
+import { useEffect, useRef } from "react";
 import ReportCard from "./ReportCard";
 import { GroupedReport } from "../types";
 import { formatDisplayDate } from "../utils";
@@ -8,6 +8,9 @@ interface ReportListProps {
   fetching: boolean;
   reportsCount: number;
   lastUpdated: string | null;
+  hasMore: boolean;
+  loadingMore: boolean;
+  onLoadMore: () => void;
 }
 
 export default function ReportList({
@@ -15,7 +18,32 @@ export default function ReportList({
   fetching,
   reportsCount,
   lastUpdated,
+  hasMore,
+  loadingMore,
+  onLoadMore,
 }: ReportListProps) {
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (!target || !hasMore || fetching) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      if (target) observer.unobserve(target);
+    };
+  }, [hasMore, loadingMore, fetching, onLoadMore]);
+
   return (
     <>
       <div className="flex items-center justify-between text-xs text-sea-light-gray">
@@ -71,6 +99,20 @@ export default function ReportList({
                 </div>
               </div>
             ))}
+
+            {hasMore && (
+              <div 
+                ref={observerTarget}
+                className="flex justify-center pt-4 pb-8 min-h-[50px]"
+              >
+                {loadingMore && (
+                    <div className="flex items-center gap-2 text-sea-gold">
+                      <div className="w-5 h-5 border-2 border-t-transparent border-sea-gold rounded-full animate-spin" />
+                      <span className="text-sm font-medium">Loading more...</span>
+                    </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
