@@ -3,7 +3,7 @@
 import { useState, memo } from "react";
 import Image from "next/image";
 import { ReportRecord } from "../types";
-import { formatTimeLabel, truncateNotes } from "../utils";
+import { formatTimeLabel } from "../utils";
 import { useSignedUrl } from "../hooks/useSignedUrl";
  
 interface ReportCardProps {

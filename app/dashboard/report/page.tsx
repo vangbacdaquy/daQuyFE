@@ -7,7 +7,6 @@ import {
   useEffect,
   useMemo,
   useState,
-  memo,
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
