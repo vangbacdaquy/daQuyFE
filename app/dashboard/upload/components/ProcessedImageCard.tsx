@@ -106,7 +106,7 @@ export function ProcessedImageCard({
                 ? "bg-sea-gold text-sea-blue"
                 : "text-sea-gray hover:text-white hover:bg-white/10"
             }`}
-            title={isEditing ? "Save & Finish" : "Edit Details"}
+            title={isEditing ? " & Finish" : "Edit Details"}
           >
             {isEditing ? (
               // Save Icon (Floppy Disk)
