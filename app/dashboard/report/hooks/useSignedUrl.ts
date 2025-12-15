@@ -35,6 +35,8 @@ export function useSignedUrl(gsUri: string | null | undefined): string {
     }
  
     // Check if there's already a pending request for this URI
+    // Note: There's a minimal race condition where a request could complete between
+    // this check and promise resolution, but it's acceptable as it will be cached
     const existingRequest = pendingRequests.get(gsUri);
     if (existingRequest) {
       existingRequest.then((url) => {

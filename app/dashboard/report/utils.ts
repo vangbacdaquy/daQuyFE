@@ -124,7 +124,7 @@ const getReportTime = (report: ReportRecord) => {
 export const groupReportsByDate = (records: ReportRecord[]) => {
   const map = new Map<string, ReportRecord[]>();
   
-  // More efficient grouping - avoid creating intermediate arrays
+  // More efficient grouping - avoid array spreading and unnecessary ?? operator calls
   for (const record of records) {
     const key = getDateKey(record);
     const existing = map.get(key);
