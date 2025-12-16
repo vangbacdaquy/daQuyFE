@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       "start_date", 
       "end_date", 
       "last_created_at", 
-      "last_image_url"
+      "last_image_url",
+      "include_summary"
     ];
 
     paramsToForward.forEach(key => {

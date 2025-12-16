@@ -13,6 +13,13 @@ export interface ReportRecord {
     variance?: number | null;
   }
   
+  export interface ReportBatch {
+    user_email: string;
+    created_at: string; // ISO timestamp
+    image_count: number;
+    batch_id?: string;
+  }
+
   export interface TotalsSummary {
     ai: number;
     manual: number;
@@ -35,4 +42,16 @@ export interface ReportRecord {
     uid: string;
     email?: string | null;
     displayName?: string | null;
+  }
+
+  export interface ReportSession {
+    id: string;
+    user_email: string;
+    timestamp: string;
+    reports: ReportRecord[];
+    summary: {
+        ai: number;
+        manual: number;
+        variance: number;
+    };
   }

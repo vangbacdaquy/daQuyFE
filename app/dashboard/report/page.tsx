@@ -14,13 +14,13 @@ import {
   ReportRecord,
   TotalsSummary,
   FiltersState,
-  GroupedReport,
+  ReportSession,
   AuthUser,
 } from "./types";
 import {
   getDefaultDateRange,
   normalizeReports,
-  groupReportsByDate,
+  groupReportsBySession,
   toDateInputValue,
 } from "./utils";
 import ReportFilters from "./components/ReportFilters";
@@ -42,6 +42,7 @@ export default function ReportPage() {
   const [debouncedFilters, setDebouncedFilters] = useState<FiltersState>(filters);
 
   const [reports, setReports] = useState<ReportRecord[]>([]);
+  const [summary, setSummary] = useState<TotalsSummary>({ ai: 0, manual: 0, variance: 0 });
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [fetching, setFetching] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -147,6 +148,8 @@ export default function ReportPage() {
         if (cursor) {
            query.set("last_created_at", cursor.created_at);
            query.set("last_image_url", cursor.image_url);
+        } else {
+           query.set("include_summary", "true");
         }
 
         const queryString = query.toString();
@@ -172,8 +175,12 @@ export default function ReportPage() {
         if (!response.ok) {
           throw new Error(payload?.error || "Failed to fetch reports");
         }
+        
+        if (payload.summary) {
+          setSummary(payload.summary);
+        }
 
-        const newReports = normalizeReports(payload);
+        const newReports = normalizeReports(payload.reports || payload);
         
         if (isLoadMore) {
           setReports((prev) => [...prev, ...newReports]);
@@ -260,31 +267,10 @@ export default function ReportPage() {
     filters.startDate && filters.endDate && filters.startDate > filters.endDate
   );
 
-  const totals = useMemo<TotalsSummary>(
-    () =>
-      reports.reduce<TotalsSummary>(
-        (acc, report) => {
-          const ai = Number(report.ai_count ?? 0);
-          const manual = Number(report.manual_count ?? 0);
-          const variance =
-            typeof report.variance === "number" &&
-            !Number.isNaN(report.variance)
-              ? report.variance
-              : manual - ai;
+  const totals = summary;
 
-          return {
-            ai: acc.ai + ai,
-            manual: acc.manual + manual,
-            variance: acc.variance + variance,
-          };
-        },
-        { ai: 0, manual: 0, variance: 0 }
-      ),
-    [reports]
-  );
-
-  const groupedReports = useMemo<GroupedReport[]>(
-    () => groupReportsByDate(reports),
+  const sessions = useMemo<ReportSession[]>(
+    () => groupReportsBySession(reports),
     [reports]
   );
 
@@ -352,7 +338,7 @@ export default function ReportPage() {
           <ReportSummary totals={totals} />
 
           <ReportList
-            groupedReports={groupedReports}
+            sessions={sessions}
             fetching={fetching}
             reportsCount={reports.length}
             lastUpdated={lastUpdated}

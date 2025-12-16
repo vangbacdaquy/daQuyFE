@@ -80,7 +80,7 @@ const getDateKey = (report: ReportRecord) => {
   return "Unknown";
 };
 
-const formatDateHeading = (value: string) => {
+export const formatDateHeading = (value: string) => {
   if (value === "Unknown") {
     return "Date unavailable";
   }
@@ -157,3 +157,64 @@ export const truncateNotes = (value?: string | null, maxLength = 160) => {
   }
   return `${value.slice(0, maxLength)}…`;
 };
+
+export const groupReportsBySession = (reports: ReportRecord[]): ReportSession[] => {
+  if (reports.length === 0) return [];
+
+  // Ensure sorted by created_at desc
+  const sorted = [...reports].sort((a, b) => {
+      const tA = new Date(a.created_at || "").getTime();
+      const tB = new Date(b.created_at || "").getTime();
+      return tB - tA;
+  });
+
+  const sessions: ReportSession[] = [];
+  let currentSession: ReportSession | null = null;
+
+  for (const report of sorted) {
+      const reportTime = new Date(report.created_at || "").getTime();
+      
+      if (!currentSession) {
+          currentSession = createNewSession(report);
+          continue;
+      }
+
+      const sessionTime = new Date(currentSession.timestamp).getTime();
+      const timeDiff = Math.abs(sessionTime - reportTime);
+      const isSameUser = currentSession.user_email === (report.user_email || "Unknown");
+
+      // Group if same user and within 5 minutes
+      if (isSameUser && timeDiff < 300000) {
+          currentSession.reports.push(report);
+          // Update summary
+          currentSession.summary.ai += report.ai_count || 0;
+          currentSession.summary.manual += report.manual_count || 0;
+          currentSession.summary.variance += (report.manual_count || 0) - (report.ai_count || 0);
+      } else {
+          sessions.push(currentSession);
+          currentSession = createNewSession(report);
+      }
+  }
+
+  if (currentSession) {
+      sessions.push(currentSession);
+  }
+
+  return sessions;
+};
+
+const createNewSession = (report: ReportRecord): ReportSession => {
+    return {
+        id: report.id || Math.random().toString(),
+        user_email: report.user_email || "Unknown",
+        timestamp: report.created_at || new Date().toISOString(),
+        reports: [report],
+        summary: {
+            ai: report.ai_count || 0,
+            manual: report.manual_count || 0,
+            variance: (report.manual_count || 0) - (report.ai_count || 0)
+        }
+    };
+};
+
+import { ReportSession } from "./types";
