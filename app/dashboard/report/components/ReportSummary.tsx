@@ -1,4 +1,3 @@
-
 import { TotalsSummary } from "../types";
 import { formatNumber } from "../utils";
 

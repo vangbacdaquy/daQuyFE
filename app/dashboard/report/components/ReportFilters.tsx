@@ -1,5 +1,4 @@
-
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { AuthUser, FiltersState } from "../types";
 import { PRESET_RANGES, toDateInputValue } from "../utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +15,6 @@ interface ReportFiltersProps {
   fetching: boolean;
   users: AuthUser[];
   onInputChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onApplyFilters: (event: FormEvent<HTMLFormElement>) => void;
   onResetFilters: () => void;
   onApplyPresetRange: (days: number) => void;
   dateMismatch: boolean;
@@ -27,7 +25,6 @@ export default function ReportFilters({
   fetching,
   users,
   onInputChange,
-  onApplyFilters,
   onResetFilters,
   onApplyPresetRange,
   dateMismatch,

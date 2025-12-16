@@ -64,5 +64,3 @@ export function useSignedUrl(gsUri: string | null | undefined): string {
  
   return signedUrl;
 }
- 
- 

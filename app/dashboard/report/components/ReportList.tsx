@@ -153,10 +153,8 @@ export default function ReportList({
                         <div className="pt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {session.reports.map((report, index) => (
                             <ReportCard
-                            key={report.id || `${session.id}-${index}`}
-                            report={report}
-                            dateKey={session.timestamp}
-                            index={index}
+                              key={report.id || `${session.id}-${index}`}
+                              report={report}
                             />
                         ))}
                         </div>

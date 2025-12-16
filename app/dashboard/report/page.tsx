@@ -2,7 +2,6 @@
 
 import {
   ChangeEvent,
-  FormEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -10,7 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
-import {
+import type {
   ReportRecord,
   TotalsSummary,
   FiltersState,
@@ -226,11 +225,6 @@ export default function ReportPage() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleApplyFilters = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setDebouncedFilters(filters);
-  };
-
   const handleResetFilters = () => {
     const defaults = { userEmail: "", ...getDefaultDateRange() };
     setFilters(defaults);
@@ -309,7 +303,6 @@ export default function ReportPage() {
             fetching={fetching}
             users={users}
             onInputChange={handleInputChange}
-            onApplyFilters={handleApplyFilters}
             onResetFilters={handleResetFilters}
             onApplyPresetRange={handleApplyPresetRange}
             dateMismatch={dateMismatch}

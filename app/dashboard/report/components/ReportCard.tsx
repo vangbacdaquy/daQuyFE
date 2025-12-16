@@ -1,15 +1,13 @@
 "use client";
- 
+
 import { useState } from "react";
 import Image from "next/image";
 import { ReportRecord } from "../types";
-import { formatTimeLabel, truncateNotes } from "../utils";
+import { formatTimeLabel } from "../utils";
 import { useSignedUrl } from "../hooks/useSignedUrl";
- 
+
 interface ReportCardProps {
   report: ReportRecord;
-  dateKey: string;
-  index: number;
 }
  
 const ChevronDownIcon = ({ className }: { className?: string }) => (
@@ -35,7 +33,7 @@ const RobotIcon = () => (
   </svg>
 );
  
-export default function ReportCard({ report, dateKey, index }: ReportCardProps) {
+export default function ReportCard({ report }: ReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
  
   const signedImageUrl = useSignedUrl(report.image_url);

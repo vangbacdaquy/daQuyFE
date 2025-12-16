@@ -1,5 +1,4 @@
-
-import { ReportRecord } from "./types";
+import { ReportRecord, ReportSession } from "./types";
 
 export const toDateInputValue = (date: Date) => date.toISOString().split("T")[0];
 
@@ -115,12 +114,6 @@ export const formatTimeLabel = (report: ReportRecord) => {
   }).format(parsed);
 };
 
-const getReportTime = (report: ReportRecord) => {
-  const value = report.timestamp_iso || report.created_at;
-  if (!value) return 0;
-  return new Date(value).getTime();
-};
-
 export const groupReportsByDate = (records: ReportRecord[]) => {
   const map = new Map<string, ReportRecord[]>();
   records.forEach((record) => {
@@ -203,18 +196,14 @@ export const groupReportsBySession = (reports: ReportRecord[]): ReportSession[] 
   return sessions;
 };
 
-const createNewSession = (report: ReportRecord): ReportSession => {
-    return {
-        id: report.id || Math.random().toString(),
-        user_email: report.user_email || "Unknown",
-        timestamp: report.created_at || new Date().toISOString(),
-        reports: [report],
-        summary: {
-            ai: report.ai_count || 0,
-            manual: report.manual_count || 0,
-            variance: (report.manual_count || 0) - (report.ai_count || 0)
-        }
-    };
-};
-
-import { ReportSession } from "./types";
+const createNewSession = (report: ReportRecord): ReportSession => ({
+    id: report.id || Math.random().toString(),
+    user_email: report.user_email || "Unknown",
+    timestamp: report.created_at || new Date().toISOString(),
+    reports: [report],
+    summary: {
+        ai: report.ai_count || 0,
+        manual: report.manual_count || 0,
+        variance: (report.manual_count || 0) - (report.ai_count || 0)
+    }
+});
