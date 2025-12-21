@@ -27,24 +27,31 @@ export default function ReportList({
 
   const groupedSessions = useMemo(() => {
     const map = new Map<string, ReportSession[]>();
-    
+
     sessions.forEach(session => {
-        try {
-            const dateKey = new Date(session.timestamp).toISOString().split('T')[0];
-            const existing = map.get(dateKey) ?? [];
-            existing.push(session);
-            map.set(dateKey, existing);
-        } catch (e) {
-            console.warn("Invalid timestamp in session", session);
-        }
+      try {
+        // Group by Vietnam date to match backend logic
+        const dateKey = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(new Date(session.timestamp));
+
+        const existing = map.get(dateKey) ?? [];
+        existing.push(session);
+        map.set(dateKey, existing);
+      } catch (e) {
+        console.warn("Invalid timestamp in session", session);
+      }
     });
 
     const sortedKeys = Array.from(map.keys()).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
     return sortedKeys.map(key => ({
-        dateKey: key,
-        readable: formatDateHeading(key),
-        sessions: map.get(key) || []
+      dateKey: key,
+      readable: formatDateHeading(key),
+      sessions: map.get(key) || []
     }));
   }, [sessions]);
 
@@ -95,7 +102,7 @@ export default function ReportList({
           <div className="space-y-8">
             {groupedSessions.map((group) => (
               <div key={group.dateKey} className="relative pb-2">
-                 {/* Sticky Date Header */}
+                {/* Sticky Date Header */}
                 <div className="sticky top-[7.4rem] z-30 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-sea-sub-blue/95 backdrop-blur-md border-y border-sea-blue/50 shadow-lg shadow-black/10 flex items-center justify-between transition-[top]">
                   <div className="flex items-center gap-3">
                     <span className="text-sea-gold font-bold text-lg tracking-wide">{group.readable}</span>
@@ -107,73 +114,73 @@ export default function ReportList({
                 </div>
 
                 <div className="space-y-6 mt-4">
-                    {group.sessions.map((session) => (
+                  {group.sessions.map((session) => (
                     <div key={session.id} className="pb-2">
-                        
-                        {/* Session Header */}
-                        <div className="sticky top-[10.6rem] z-20 bg-sea-sub-blue/95 backdrop-blur-md py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 border-y border-sea-blue/30 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-sea-blue flex items-center justify-center text-sea-gold font-bold shadow-inner text-sm sm:text-base ring-2 ring-sea-blue/50 shrink-0">
-                                    {session.user_email.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="text-sm text-sea-light-gray">
-                                    <span className="font-bold text-sea-gold">{session.user_email.split('@')[0]}</span>
-                                    {" uploaded "}
-                                    <span className="font-bold text-white">{session.reports.length} images</span>
-                                    {" at "}
-                                    <span>{new Date(session.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center gap-4 text-xs sm:text-sm pl-11 sm:pl-0">
-                                <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="AI Count">
-                                    <Bot className="w-3.5 h-3.5 text-sea-light-gray" />
-                                    <span className="font-bold text-sea-gold">{session.summary.ai}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="Manual Count">
-                                    <UserCheck className="w-3.5 h-3.5 text-sea-light-gray" />
-                                    <span className="font-bold text-white">{session.summary.manual}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="Variance">
-                                    {session.summary.variance > 0 ? (
-                                        <TrendingUp className="w-3.5 h-3.5 text-sea-light-gray" />
-                                    ) : session.summary.variance < 0 ? (
-                                        <TrendingDown className="w-3.5 h-3.5 text-sea-light-gray" />
-                                    ) : (
-                                        <Minus className="w-3.5 h-3.5 text-sea-light-gray" />
-                                    )}
-                                    <span className={`font-bold ${session.summary.variance === 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {session.summary.variance > 0 ? '+' : ''}{session.summary.variance}
-                                    </span>
-                                </div>
-                            </div>
+                      {/* Session Header */}
+                      <div className="sticky top-[10.6rem] z-20 bg-sea-sub-blue/95 backdrop-blur-md py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 border-y border-sea-blue/30 shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-sea-blue flex items-center justify-center text-sea-gold font-bold shadow-inner text-sm sm:text-base ring-2 ring-sea-blue/50 shrink-0">
+                            {session.user_email.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="text-sm text-sea-light-gray">
+                            <span className="font-bold text-sea-gold">{session.user_email.split('@')[0]}</span>
+                            {" uploaded "}
+                            <span className="font-bold text-white">{session.reports.length} images</span>
+                            {" at "}
+                            <span>{new Date(session.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
                         </div>
 
-                        {/* Reports Grid */}
-                        <div className="pt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="flex items-center gap-4 text-xs sm:text-sm pl-11 sm:pl-0">
+                          <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="AI Count">
+                            <Bot className="w-3.5 h-3.5 text-sea-light-gray" />
+                            <span className="font-bold text-sea-gold">{session.summary.ai}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="Manual Count">
+                            <UserCheck className="w-3.5 h-3.5 text-sea-light-gray" />
+                            <span className="font-bold text-white">{session.summary.manual}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-sea-blue/20 px-2 py-1 rounded sm:bg-transparent sm:p-0" title="Variance">
+                            {session.summary.variance > 0 ? (
+                              <TrendingUp className="w-3.5 h-3.5 text-sea-light-gray" />
+                            ) : session.summary.variance < 0 ? (
+                              <TrendingDown className="w-3.5 h-3.5 text-sea-light-gray" />
+                            ) : (
+                              <Minus className="w-3.5 h-3.5 text-sea-light-gray" />
+                            )}
+                            <span className={`font-bold ${session.summary.variance === 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {session.summary.variance > 0 ? '+' : ''}{session.summary.variance}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Reports Grid */}
+                      <div className="pt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {session.reports.map((report, index) => (
-                            <ReportCard
-                              key={report.id || `${session.id}-${index}`}
-                              report={report}
-                            />
+                          <ReportCard
+                            key={report.id || `${session.id}-${index}`}
+                            report={report}
+                          />
                         ))}
-                        </div>
+                      </div>
                     </div>
-                    ))}
+                  ))}
                 </div>
               </div>
             ))}
 
             {hasMore && (
-              <div 
+              <div
                 ref={observerTarget}
                 className="flex justify-center pt-4 pb-8 min-h-[50px]"
               >
                 {loadingMore && (
-                    <div className="flex items-center gap-2 text-sea-gold">
-                      <div className="w-5 h-5 border-2 border-t-transparent border-sea-gold rounded-full animate-spin" />
-                      <span className="text-sm font-medium">Loading more...</span>
-                    </div>
+                  <div className="flex items-center gap-2 text-sea-gold">
+                    <div className="w-5 h-5 border-2 border-t-transparent border-sea-gold rounded-full animate-spin" />
+                    <span className="text-sm font-medium">Loading more...</span>
+                  </div>
                 )}
               </div>
             )}

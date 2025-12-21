@@ -1,6 +1,13 @@
 import { ReportRecord, ReportSession } from "./types";
 
-export const toDateInputValue = (date: Date) => date.toISOString().split("T")[0];
+export const toDateInputValue = (date: Date) => {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+};
 
 export const PRESET_RANGES = [
   { label: "Today", days: 0 },
@@ -73,7 +80,12 @@ const getDateKey = (report: ReportRecord) => {
   if (report.created_at) {
     const parsed = new Date(report.created_at);
     if (!Number.isNaN(parsed.valueOf())) {
-      return parsed.toISOString().split("T")[0];
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(parsed);
     }
   }
   return "Unknown";
@@ -94,6 +106,7 @@ export const formatDateHeading = (value: string) => {
     month: "short",
     day: "2-digit",
     year: "numeric",
+    timeZone: "UTC",
   }).format(parsed);
 };
 
@@ -132,7 +145,7 @@ export const groupReportsByDate = (records: ReportRecord[]) => {
   return sortedKeys.map((key) => {
     const groupRecords = map.get(key) ?? [];
     // Records are expected to be pre-sorted from API/store.
-    
+
     return {
       dateKey: key,
       readable: formatDateHeading(key),
@@ -156,54 +169,54 @@ export const groupReportsBySession = (reports: ReportRecord[]): ReportSession[] 
 
   // Ensure sorted by created_at desc
   const sorted = [...reports].sort((a, b) => {
-      const tA = new Date(a.created_at || "").getTime();
-      const tB = new Date(b.created_at || "").getTime();
-      return tB - tA;
+    const tA = new Date(a.created_at || "").getTime();
+    const tB = new Date(b.created_at || "").getTime();
+    return tB - tA;
   });
 
   const sessions: ReportSession[] = [];
   let currentSession: ReportSession | null = null;
 
   for (const report of sorted) {
-      const reportTime = new Date(report.created_at || "").getTime();
-      
-      if (!currentSession) {
-          currentSession = createNewSession(report);
-          continue;
-      }
+    const reportTime = new Date(report.created_at || "").getTime();
 
-      const sessionTime = new Date(currentSession.timestamp).getTime();
-      const timeDiff = Math.abs(sessionTime - reportTime);
-      const isSameUser = currentSession.user_email === (report.user_email || "Unknown");
+    if (!currentSession) {
+      currentSession = createNewSession(report);
+      continue;
+    }
 
-      // Group if same user and within 5 minutes
-      if (isSameUser && timeDiff < 300000) {
-          currentSession.reports.push(report);
-          // Update summary
-          currentSession.summary.ai += report.ai_count || 0;
-          currentSession.summary.manual += report.manual_count || 0;
-          currentSession.summary.variance += (report.manual_count || 0) - (report.ai_count || 0);
-      } else {
-          sessions.push(currentSession);
-          currentSession = createNewSession(report);
-      }
+    const sessionTime = new Date(currentSession.timestamp).getTime();
+    const timeDiff = Math.abs(sessionTime - reportTime);
+    const isSameUser = currentSession.user_email === (report.user_email || "Unknown");
+
+    // Group if same user and within 5 minutes
+    if (isSameUser && timeDiff < 300000) {
+      currentSession.reports.push(report);
+      // Update summary
+      currentSession.summary.ai += report.ai_count || 0;
+      currentSession.summary.manual += report.manual_count || 0;
+      currentSession.summary.variance += (report.manual_count || 0) - (report.ai_count || 0);
+    } else {
+      sessions.push(currentSession);
+      currentSession = createNewSession(report);
+    }
   }
 
   if (currentSession) {
-      sessions.push(currentSession);
+    sessions.push(currentSession);
   }
 
   return sessions;
 };
 
 const createNewSession = (report: ReportRecord): ReportSession => ({
-    id: report.id || Math.random().toString(),
-    user_email: report.user_email || "Unknown",
-    timestamp: report.created_at || new Date().toISOString(),
-    reports: [report],
-    summary: {
-        ai: report.ai_count || 0,
-        manual: report.manual_count || 0,
-        variance: (report.manual_count || 0) - (report.ai_count || 0)
-    }
+  id: report.id || Math.random().toString(),
+  user_email: report.user_email || "Unknown",
+  timestamp: report.created_at || new Date().toISOString(),
+  reports: [report],
+  summary: {
+    ai: report.ai_count || 0,
+    manual: report.manual_count || 0,
+    variance: (report.manual_count || 0) - (report.ai_count || 0)
+  }
 });
